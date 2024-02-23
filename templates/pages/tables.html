@@ -1,0 +1,238 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% block title %}Fakultetlar{% endblock %}
+{% block content %}
+<style>
+    /* Modal */
+    .modal-dialog {
+        max-width: 800px; /* Increased modal width */
+    }
+
+    .modal-content {
+        border-radius: 8px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .modal-header {
+        background-color: #007bff;
+        color: #fff;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .modal-title {
+        font-size: 1.8rem; /* Increased font size */
+        font-weight: 600;
+    }
+
+    .btn-close {
+        background-color: #fff;
+        border-radius: 50%;
+        opacity: 0.8;
+    }
+
+    /* Tabs */
+    .nav-tabs {
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .nav-item {
+        margin-right: 1rem;
+    }
+
+    .nav-link {
+        color: #6c757d;
+        font-weight: 500;
+        font-size: 1.1rem; /* Increased font size */
+        border-radius: 0.25rem 0.25rem 0 0;
+    }
+
+    .nav-link.active {
+        color: #007bff;
+        background-color: #f8f9fa;
+        border-color: #dee2e6 #dee2e6 #fff;
+    }
+
+    .tab-content {
+        padding: 1rem;
+    }
+
+    .tab-pane {
+        background-color: #f8f9fa;
+        border-radius: 0 0 0.25rem 0.25rem;
+    }
+
+    /* Button */
+    button[type="submit"] {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.25rem;
+        font-size: 1.1rem; /* Increased font size */
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    button[type="submit"]:hover {
+        background-color: #0069d9;
+    }
+
+
+</style>
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"
+         data-mdb-backdrop="static" data-mdb-keyboard="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Faculty create</h5>
+                    <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <!-- Tabs navs -->
+                <ul class="nav nav-tabs mb-3" id="ex-with-icons" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a data-mdb-tab-init class="nav-link active" id="ex-with-icons-tab-1"
+                           href="#ex-with-icons-tabs-1" role="tab"
+                           aria-controls="ex-with-icons-tabs-1" aria-selected="true"><i
+                                class="fas fa-chart-pie fa-fw me-2"></i>Sales</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a data-mdb-tab-init class="nav-link" id="ex-with-icons-tab-2" href="#ex-with-icons-tabs-2"
+                           role="tab"
+                           aria-controls="ex-with-icons-tabs-2" aria-selected="false"><i
+                                class="fas fa-chart-line fa-fw me-2"></i>Subscriptions</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a data-mdb-tab-init class="nav-link" id="ex-with-icons-tab-3" href="#ex-with-icons-tabs-3"
+                           role="tab"
+                           aria-controls="ex-with-icons-tabs-3" aria-selected="false"><i
+                                class="fas fa-cogs fa-fw me-2"></i>Settings</a>
+                    </li>
+                </ul>
+                <!-- Tabs navs -->
+
+                <!-- Tabs content -->
+             <form method="post" action="{% url 'group_create' %}">
+              {% csrf_token %}
+                <div class="tab-content" id="ex-with-icons-content">
+                    <div class="tab-pane fade show active" id="ex-with-icons-tabs-1" role="tabpanel"
+                         aria-labelledby="ex-with-icons-tab-1">
+                        {{ form.as_p }}
+
+                    </div>
+                    <div class="tab-pane fade" id="ex-with-icons-tabs-2" role="tabpanel"
+                         aria-labelledby="ex-with-icons-tab-2">
+                        <h2>Shartmonoma</h2>
+                    {{ shartmonoma.management_form }}
+                    {% for form in shartmonoma %}
+                        {{ form.as_p }}
+                    {% endfor %}
+                    </div>
+                    <div class="tab-pane fade" id="ex-with-icons-tabs-3" role="tabpanel"
+                         aria-labelledby="ex-with-icons-tab-3">
+                        <h2>Budjet</h2>
+                    {{ budjet.management_form }}
+                    {% for form in budjet %}
+                        {{ form.as_p }}
+                    {% endfor %}
+                      <button type="submit">Create Group</button>
+                    </div>
+
+                </div>
+                <!-- Tabs content -->
+
+
+
+
+
+
+
+
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="midde_cont">
+        <div class="container-fluid">
+            <div class="row column_title">
+                <div class="col-md-12">
+                    <div class="page_title">
+                        <h2>Groups</h2>
+                        <div class="col-12 col-md-auto d-flex align-items-center justify-content-end page-actions">
+                            <div style="padding-right: 12px;">
+                                <button type="button" class="btn btn-primary">Export Exel</button>
+                            </div>
+                            <a href="{% url 'group_create' %}" class="btn btn-success float-right" +
+                               >
+                                <i class="fa fa-plus-circle"></i> &nbsp; Add gorup
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- end graph -->
+            <div class="row column3">
+            </div>
+            <!-- end progress bar -->
+        </div>
+        <div class="col-12 grid-margin">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Groups</h4>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>
+                                    <div class="form-check form-check-muted m-0">
+                                        <label class="form-check-label">
+                                        </label>
+                                    </div>
+                                </th>
+                                <th> Group name</th>
+                                <th> Nomer</th>
+                                <th> All students</th>
+                                <th> kurs</th>
+                                <th> yonalish</th>
+                                <th> Crud</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for group in groups %}
+                                <tr>
+                                    <td>
+                                        <div class="form-check form-check-muted m-0">
+                                            <label class="form-check-label">
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <td>
+
+                                        <span class="pl-2">{{ group.name }}</span>
+                                    </td>
+                                    <td> 02312</td>
+                                    <td> {{ group.allstudents }}</td>
+                                    <td> {{ group.kurs.name }}</td>
+                                    <td> {{ group.yonalish }}</td>
+                                    <td>
+                                        <a href="/dashboard/bookdelete/43/" class="btn btn-primary btn-lg"><i
+                                                class="fa fa-pencil" style="color: #fff;"></i></a>
+                                        <a href="/dashboard/bookdelete/43/" class="btn btn-danger btn-lg"><i
+                                                class="fa fa-mail-reply" style="color: #fff;"></i></a>
+                                        <a href="/dashboard/bookdelete/43/" class="btn btn-success btn-lg"><i
+                                                class="fa fa-check-square" style="color: #fff;"></i></a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- end dashboard inner -->
+{% endblock %}

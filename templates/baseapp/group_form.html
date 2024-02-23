@@ -1,0 +1,149 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% block title %}Fakultetlar{% endblock %}
+{% block content %}
+    <style>
+        /* Modal */
+        .modal-dialog {
+            max-width: 1200px;
+        }
+
+        .modal-content {
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            background-color: #6610f2;
+            color: #fff;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .modal-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .btn-close {
+            background-color: #fff;
+            border-radius: 50%;
+            opacity: 0.8;
+        }
+
+        /* Tabs */
+        .nav-tabs {
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .nav-item {
+            margin-right: 1rem;
+        }
+
+        .nav-link {
+            color: #6c757d;
+            font-weight: 500;
+            font-size: 1.1rem;
+            border-radius: 0.25rem 0.25rem 0 0;
+        }
+
+        .nav-link.active {
+            color: #6610f2;
+            background-color: #f8f9fa;
+            border-color: #dee2e6 #dee2e6 #fff;
+        }
+
+        .tab-content {
+            padding: 1rem;
+        }
+
+        .tab-pane {
+            background-color: #f8f9fa;
+            border-radius: 0 0 0.25rem 0.25rem;
+        }
+
+        /* Button */
+        button[type="submit"] {
+            background-color: #6610f2;
+            color: #fff;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #5e16d0;
+        }
+
+        /* Prevent negative values in number inputs */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+    </style>
+    <div class="col-12 grid-margin" style="padding-left: 450px">
+        <div class="card" style="width: 60rem;">
+            <div class="card-body">
+                <h4 class="card-title">Add Kurs</h4>
+
+                <ul class="nav nav-tabs mb-3" id="ex-with-icons" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a data-mdb-tab-init class="nav-link active" id="ex-with-icons-tab-1"
+                           href="#ex-with-icons-tabs-1" role="tab"
+                           aria-controls="ex-with-icons-tabs-1" aria-selected="true"><i
+                                class="fas fa-chart-pie fa-fw me-2"></i>Group</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a data-mdb-tab-init class="nav-link" id="ex-with-icons-tab-2" href="#ex-with-icons-tabs-2"
+                           role="tab"
+                           aria-controls="ex-with-icons-tabs-2" aria-selected="false"><i
+                                class="fas fa-chart-line fa-fw me-2"></i>Shartmonoma</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a data-mdb-tab-init class="nav-link" id="ex-with-icons-tab-3" href="#ex-with-icons-tabs-3"
+                           role="tab"
+                           aria-controls="ex-with-icons-tabs-3" aria-selected="false"><i
+                                class="fas fa-cogs fa-fw me-2"></i>Budjet</a>
+                    </li>
+                </ul>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="tab-content" id="ex-with-icons-content">
+                        <div class="tab-pane fade show active" id="ex-with-icons-tabs-1" role="tabpanel"
+                             aria-labelledby="ex-with-icons-tab-1">
+                            {{ form.as_p }}
+                        </div>
+                        <div class="tab-pane fade" id="ex-with-icons-tabs-2" role="tabpanel"
+                             aria-labelledby="ex-with-icons-tab-2">
+                            <h2>Shartmonoma</h2>
+                            {{ shartmonoma.management_form }}
+                            {% for form in shartmonoma %}
+                                {{ form.as_p }}
+                            {% endfor %}
+                        </div>
+                        <div class="tab-pane fade" id="ex-with-icons-tabs-3" role="tabpanel"
+                             aria-labelledby="ex-with-icons-tab-3">
+                            <h2>Budjet</h2>
+                            {{ budjet.management_form }}
+                            {% for form in budjet %}
+                                {{ form.as_p }}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <button type="submit">Create Group</button>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

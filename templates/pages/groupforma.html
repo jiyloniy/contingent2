@@ -1,0 +1,22 @@
+{% extends  'layouts/formsbase.html' %}
+{% load static %}
+{% block title %}Fakultetlar{% endblock %}
+{% block content %}
+
+<div class="col-12 grid-margin">
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title
+                     ">Add Faculty</h4>
+            <form action="" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    {{ form.as_p }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

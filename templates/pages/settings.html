@@ -1,0 +1,115 @@
+
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% block title %}Fakultetlar{% endblock %}
+{% block content %}
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"
+         data-mdb-backdrop="static" data-mdb-keyboard="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Faculty create</h5>
+                    <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{% url 'yonalishcreate' %}" method="post">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            {{ form }}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">
+                            Close
+                        </button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+<div class="midde_cont">
+    <div class="container-fluid">
+        <div class="row column_title">
+            <div class="col-md-12">
+                <div class="page_title">
+                    <h2>Yo'nalishlar</h2>
+                    <div class="col-12 col-md-auto d-flex align-items-center justify-content-end page-actions">
+                        <div style="padding-right: 12px;">
+                            <button type="button" class="btn btn-primary">Export Exel</button>
+                        </div>
+                        <a href="" data-mdb-modal-init data-mdb-target="#exampleModal" class="btn btn-success float-right"
+                           +>
+                            <i class="fa fa-plus-circle"></i> &nbsp;Add yonalish
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- end graph -->
+        <div class="row column3">
+        </div>
+        <!-- end progress bar -->
+    </div>
+    <div class="col-12 grid-margin">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Yo'nalishlar</h4>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+
+                        <tr>
+                            <th>
+                                <div class="form-check form-check-muted m-0">
+                                    <label class="form-check-label">
+                                    </label>
+                                </div>
+                            </th>
+                            <th> Client Name</th>
+                            <th> Yonalish id</th>
+
+                            <th> Crud</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for foo in yonalishlar %}
+                        	    <tr>
+                            <td>
+                                <div class="form-check form-check-muted m-0">
+                                    <label class="form-check-label">
+                                    </label>
+                                </div>
+                            </td>
+                            <td>
+
+                                <h6> <span class="pl-2">{{ foo.name }}</span></h6>
+                            </td>
+                            <td> 02312</td>
+
+                            <td>
+                                <a href="{% url 'yonalishupdate' foo.pk %}" class="btn btn-primary btn-lg"><i
+                                        class="fa fa-pencil" style="color: #fff;"></i></a>
+                                <a href="{% url 'yonalishdelete' foo.pk %}" class="btn btn-danger btn-lg"><i
+                                        class="fa fa-mail-reply" style="color: #fff;"></i></a>
+
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
