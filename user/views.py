@@ -507,14 +507,15 @@ def user_create(request):
 def user_update(request, pk):
     if request.user.user_permissions.filter(codename='change_user').exists():
         user = User.objects.get(id=pk)
+        print(user)
         form = UserRule(instance=user)
         if request.method == 'POST':
             form = UserRule(request.POST, instance=user)
             if form.is_valid():
                 # find user rules and change
-                if UserOrg.objects.filter(user=request.user).exists():
-                    org = UserOrg.objects.get(user=request.user).org
-                    user_rules = UserRules.objects.get(user=user, org=org)
+                form.save()
+                if Organization.objects.filter(user=request.user).exists():
+                    user_rules = UserRules.objects.get(user=user)
                     user_rules.full_access = form.cleaned_data.get('full_access')
                     user_rules.can_view_faculty = form.cleaned_data.get('can_view_faculty')
                     user_rules.can_add_faculty = form.cleaned_data.get('can_add_faculty')
@@ -533,8 +534,14 @@ def user_update(request, pk):
                     user_rules.can_update_user = form.cleaned_data.get('can_update_user')
                     user_rules.can_delete_user = form.cleaned_data.get('can_delete_user')
                     user_rules.save()
-                    # find user and change
                     user.username = form.cleaned_data.get('username')
                     user.set_password(form.cleaned_data.get('password'))
                     user.save()
                     return redirect('userlist')
+            else:
+                messages.error(request, 'Form is not valid')
+                return redirect('userlist')
+        context = {'form': form}
+        return render(request, 'baseapp/user_form.html', context)
+    messages.error(request, 'You do not have permission to update user')
+    return redirect('userlist')
