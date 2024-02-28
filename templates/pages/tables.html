@@ -162,10 +162,12 @@
                             <div style="padding-right: 12px;">
                                 <button type="button" class="btn btn-primary">Export Exel</button>
                             </div>
+                            {% if perms.user.add_guruh %}
                             <a href="{% url 'group_create' %}" class="btn btn-success float-right" +
                                >
                                 <i class="fa fa-plus-circle"></i> &nbsp; Add gorup
                             </a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -215,12 +217,16 @@
                                     <td> {{ group.kurs.name }}</td>
                                     <td> {{ group.yonalish }}</td>
                                     <td>
-                                        <a href="/dashboard/bookdelete/43/" class="btn btn-primary btn-lg"><i
+
+                                        {% if perms.user.change_guruh %}
+                                        <a href={% url 'guruhupdate' group.pk %} class="btn btn-primary btn-lg"><i
                                                 class="fa fa-pencil" style="color: #fff;"></i></a>
-                                        <a href="/dashboard/bookdelete/43/" class="btn btn-danger btn-lg"><i
+                                        {% endif %}
+                                        {% if perms.user.delete_guruh %}
+                                        <a href="{% url 'guruhdelete' group.pk %}" class="btn btn-danger btn-lg"><i
                                                 class="fa fa-mail-reply" style="color: #fff;"></i></a>
-                                        <a href="/dashboard/bookdelete/43/" class="btn btn-success btn-lg"><i
-                                                class="fa fa-check-square" style="color: #fff;"></i></a>
+                                        {% endif %}
+
                                     </td>
                                 </tr>
                             {% endfor %}

@@ -42,10 +42,13 @@
                             <div style="padding-right: 12px;">
                                 <button type="button" class="btn btn-primary">Export Exel</button>
                             </div>
-                            <a href="" class="btn btn-success float-right" +
-                               data-mdb-modal-init data-mdb-target="#exampleModal">
-                                <i class="fa fa-plus-circle"></i> &nbsp; Add faculty
-                            </a>
+                            {% if perms.user.add_faculty %}
+
+                                <a href="" class="btn btn-success float-right" +
+                                   data-mdb-modal-init data-mdb-target="#exampleModal">
+                                    <i class="fa fa-plus-circle"></i> &nbsp; Add faculty
+                                </a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -92,15 +95,19 @@
 
 
                                     <td>
-                                        <a class="edit-btn btn btn-primary btn-lg"
-                                           href="{% url 'facultyupdate' foo.pk %}"><i
-                                                class="fa fa-pencil" style="color: #fff;"></i></a>
+                                        {% if perms.user.change_faculty %}
 
 
-{#                                        <a href="{% url 'facultydelete' foo.pk %}"#}
-{#                                           class="delete-btn edit-btn btn btn-danger btn-lg delete-button"#}
-{#                                           data-id="{{ foo.id }}"><i class=" fa fa-trash-restore"></i></a>#}
+                                            <a class="edit-btn btn btn-primary btn-lg"
+                                               href="{% url 'facultyupdate' foo.pk %}"><i
+                                                    class="fa fa-pencil" style="color: #fff;"></i></a>
+                                        {% endif %}
+                                        {% if  perms.user.delete_faculty %}
 
+                                            <a href="{% url 'facultydelete' foo.pk %}"
+                                               class="delete-btn edit-btn btn btn-danger btn-lg delete-button"
+                                               data-id="{{ foo.pk }}"><i class=" fa fa-trash-restore"></i></a>
+                                        {% endif %}
                                     </td>
                                 </tr>
 
@@ -125,6 +132,42 @@
         </div>
 
     </div>
+    <script>
+{#       write alert for delete faculty#}
+        $('.delete-button').click(function () {
+            var id = $(this).data('id');
+            var url = "{% url 'facultydelete' 0 %}".replace('0', id);
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: url,
+                        type: 'DELETE',
+                        data: {
+                            csrfmiddlewaretoken: '{{ csrf_token }}'
+                        },
+                        success: function (data) {
+                            Swal.fire(
+                                'Deleted!',
+                                'Your file has been deleted.',
+                                'success'
+                            ).then((result) => {
+                                location.reload();
+                            });
+                        }
+                    });
+                }
+            });
+        });
+
+    </script>
 
 {% endblock %}
 

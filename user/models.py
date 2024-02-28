@@ -8,15 +8,30 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 
-class Organization(models.Model):
-    user = models.ForeignKey(User, models.SET_NULL, blank=True, null=True)
-    name = models.CharField(max_length=100)
+class   UserRules(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    org = models.ForeignKey('Organization', on_delete=models.CASCADE, null=True, blank=True)
+    movqesi = models.CharField(max_length=100)
+    password = models.CharField(max_length=100, null=True, blank=True)
+    username = models.CharField(max_length=100, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    img = models.ImageField(upload_to='organization/', null=True, blank=True)
-
-    def __str__(self):
-        return self.name
-
+    can_add_faculty = models.BooleanField(default=False)
+    can_add_yonalish = models.BooleanField(default=False)
+    can_add_guruh = models.BooleanField(default=False)
+    can_update_faculty = models.BooleanField(default=False)
+    can_update_yonalish = models.BooleanField(default=False)
+    can_update_guruh = models.BooleanField(default=False)
+    can_delete_faculty = models.BooleanField(default=False)
+    can_delete_yonalish = models.BooleanField(default=False)
+    can_delete_guruh = models.BooleanField(default=False)
+    can_view_faculty = models.BooleanField(default=False)
+    can_view_yonalish = models.BooleanField(default=False)
+    can_view_guruh = models.BooleanField(default=   False)
+    full_access = models.BooleanField(default=False)
+    can_delete_user = models.BooleanField(default=False)
+    can_add_user = models.BooleanField(default=False)
+    can_update_user = models.BooleanField(default=False)
+    can_view_user = models.BooleanField(default=False)
     def assign_perm(self, user, perm_codename):
         content_type = ContentType.objects.get_for_model(self.__class__)
         permission = Permission.objects.get(
@@ -32,6 +47,22 @@ class Organization(models.Model):
             content_type=content_type,
         )
         user.user_permissions.remove(permission)
+
+    def __str__(self):
+        return self.user.username
+
+    class Meta:
+        verbose_name_plural = 'Foydalanuvchilar'
+
+
+class Organization(models.Model):
+    user = models.ForeignKey(User, models.SET_NULL, blank=True, null=True)
+    name = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+    img = models.ImageField(upload_to='organization/', null=True, blank=True)
+
+    def __str__(self):
+        return self.name
 
 
 class UserOrg(models.Model):
@@ -59,7 +90,6 @@ class UserOrg(models.Model):
 
     class Meta:
         verbose_name_plural = 'Tashkilotlar'
-
 
 
 class Faculty(models.Model):

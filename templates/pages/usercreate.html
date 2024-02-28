@@ -1,0 +1,63 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% block title %}Fakultetlar{% endblock %}
+{% block content %}
+               <div class="midde_cont">
+                  <div class="container-fluid">
+                     <div class="row column_title">
+                        <div class="col-md-12">
+                           <div class="page_title">
+                              <h2>User Create</h2>
+                              <div class="col-12 col-md-auto d-flex align-items-center justify-content-end page-actions"> 
+                                 <div style="padding-right: 12px;">
+                                    <button type="button" class="btn btn-primary">Export Exel</button>
+                                 </div>
+                                 <a href="{% url 'usercreate' %}" class="btn btn-success float-right"+>
+                                    <i class="fa fa-plus-circle"></i> &nbsp; Add
+                                 </a>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+                  <!-- end progress bar -->
+               </div>
+            <div class="col-12 grid-margin">
+               <div class="card">
+                 <div class="card-body">
+                   <h4 class="card-title">User Create</h4>
+                   <div class="table-responsive">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th scope="col">#</th>
+                          <th scope="col">First</th>
+                          <th scope="col">Last</th>
+                          <th scope="col"> Crud </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for user in users %}
+                            <tr>
+                          <th scope="row">1</th>
+                          <td>{{ user.username }}</td>
+                          <td>Otto</td>
+                          <td>
+                            <a href="{% url 'userupdate' user.pk %}" class="btn btn-primary btn-lg"><i class="fa fa-pencil" style="color: #fff;"></i></a>
+                            <a href="/dashboard/bookdelete/43/" class="btn btn-danger btn-lg"><i class="fa fa-mail-reply" style="color: #fff;"></i></a>
+                            <a href="/dashboard/bookdelete/43/" class="btn btn-success btn-lg"><i class="fa fa-check-square" style="color: #fff;"></i></a>
+                          </td>
+                        </tr>
+                        {% endfor %}
+
+
+
+                      </tbody>
+                    </table>
+                  </div>
+                  <button type="button" class="btn btn-primary">Submit</button>
+                </div>
+              </div>
+            </div>
+
+            </div>
+{% endblock %}

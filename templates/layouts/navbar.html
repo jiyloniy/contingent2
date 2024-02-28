@@ -1,17 +1,59 @@
- <!-- Sidebar  -->
-            <nav id="sidebar">
-               <div class="sidebar_blog_2">
-                  <h4>General</h4>
-                  <ul class="list-unstyled components">
-                     <li class="active">
-                        <a href="{% url 'dashboard' %}"><i class="fa fa-graduation-cap"></i> <span>Fakultetlar</span></a>
-                     </li>
+{% load static %}
+<!-- Sidebar  -->
+<nav id="sidebar">
+    <div class="sidebar_user_info">
+        <div class="icon_setting"></div>
+        <div class="user_profle_side">
+            <div class="user_img"><img class="img-responsive"
+                                       src="{% static 'images/logo/photo_2023-01-10_11-51-55.jpg' %}" alt="#">
+            </div>
+            <div class="user_info">
+                <p><span class="online_animation"></span> active</p>
+            </div>
+        </div>
+    </div>
+    <div class="sidebar_blog_2">
 
-                     <li><a href="{% url 'yonalishlar' %}"><i class="fa fa-bars"></i> <span>Yo`nalishlar</span></a></li>
-                     
-                     <li><a href="{% url 'guruh' %}"><i class="fa fa-users"></i> <span>Groups</span></a></li>
+        <h4>Korea Internatioanl University In Ferghana</h4>
 
-                  </ul>
-               </div>
-            </nav>
-            <!-- end sidebar -->
+        <ul class="list-unstyled components">
+            {% if perms.user.view_faculty %}
+                <li class="active">
+                    <a href="{% url 'dashboard' %}"><i class="fa fa-graduation-cap"></i> <span>Fakultetlar</span></a>
+                </li>
+            {% endif %}
+
+
+            {% if perms.user.view_yonalish %}
+                <li><a href="{% url 'yonalishlar' %}"><i class="fa fa-bars"></i> <span>Yo`nalishlar</span></a></li>
+            {% endif %}
+
+
+            {% if perms.user.view_guruh %}
+
+                <li><a href="{% url 'guruh' %}"><i class="fa fa-users"></i> <span>Groups</span></a></li>
+            {% endif %}
+
+
+            <li>
+                {% if perms.user.view_userrulser %}
+                <div class="dropdown">
+                    <a class="dropdown-toggle" href="" role="button" id="dropdownMenuLink"
+                       data-toggle="dropdown" aria-expanded="false">
+                        <i class="fa fa-ellipsis-h"></i>
+                        Rules
+                    </a>
+                    
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                        {% if perms.user.view_userrulser %}
+                        <li><a class="dropdown-item" href="{% url 'userlist' %}">user create</a></li>
+                        {% endif %}
+                        <li><a class="dropdown-item" href="rule.html">rules</a></li>
+                    </ul>
+                </div>
+                {% endif %}
+            </li>
+        </ul>
+    </div>
+</nav>
+<!-- end sidebar -->

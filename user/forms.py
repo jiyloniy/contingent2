@@ -1,7 +1,9 @@
 from django import forms
 from django.forms import inlineformset_factory
 from django.contrib.auth.models import User
-from user.models import Guruh, Budjet, Shartnoma, Faculty, Yonalish, UserOrg, Organization
+from django.http import request
+
+from user.models import Guruh, Budjet, Shartnoma, Faculty, Yonalish, UserOrg, Organization,UserRules
 
 
 class UserOrgForm(forms.ModelForm):
@@ -119,6 +121,7 @@ class FacultyForm(forms.ModelForm):
             'name': forms.TextInput(attrs={'class': 'form-control'})
         }
 
+
 #
 # class YonalishForm(forms.ModelForm):
 #     class Meta:
@@ -209,4 +212,134 @@ class LoginForm(forms.Form):
         if not user:
             raise forms.ValidationError('Username or password is incorrect')
         return self.cleaned_data
+
+
 # Compare this snippet from user/views.py:
+
+# UserOrg creation fomrs
+# class UserRules(forms.Form):
+#     username = forms.CharField(max_length=100, label='Login')
+#     password = forms.CharField(max_length=100, label='Parol', widget=forms.PasswordInput)
+#     # rules
+#     can_add_faculty = forms.BooleanField(label='Fakultet qo`shish', required=False)
+#     can_update_faculty = forms.BooleanField(label='Fakultetni tahrirlash', required=False)
+#     can_delete_faculty = forms.BooleanField(label='Fakultetni o`chirish', required=False)
+#     can_view_faculty = forms.BooleanField(label='Fakultetni ko`rish', required=False)
+#     can_add_yonalish = forms.BooleanField(label='Yonalish qo`shish', required=False)
+#     can_update_yonalish = forms.BooleanField(label='Yonalishni tahrirlash', required=False)
+#     can_delete_yonalish = forms.BooleanField(label='Yonalishni o\'chirish', required=False)
+#     can_view_yonalish = forms.BooleanField(label='Yonalishni ko\'rish', required=False)
+#     can_add_guruh = forms.BooleanField(label='Guruh qo\'shish', required=False)
+#     can_update_guruh = forms.BooleanField(label='Guruhni tahrirlash', required=False)
+#     can_delete_guruh = forms.BooleanField(label='Guruhni o\'chirish', required=False)
+#     can_view_guruh = forms.BooleanField(label='Guruhni ko\'rish', required=False)
+#     can_add_user = forms.BooleanField(label='Foydalanuvchi qo\'shish', required=False)
+#     can_update_user = forms.BooleanField(label='Foydalanuvchini tahrirlash', required=False)
+#     can_delete_user = forms.BooleanField(label='Foydalanuvchini o\'chirish', required=False)
+#     can_view_user = forms.BooleanField(label='Foydalanuvchini ko\'rish', required=False)
+#     full_access = forms.BooleanField(label='Barcha huquqlar', required=False)
+#
+#     widgets = {
+#         'username': forms.TextInput(attrs={'class': 'form-control'}),
+#         'password': forms.PasswordInput(attrs={'class': 'form-control'}),
+#         'can_add_faculty': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+#         'can_update_faculty': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+#         'can_delete_faculty': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+#         'can_view_faculty': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+#         'can_add_yonalish': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+#         'can_update_yonalish': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+#         'can_delete_yonalish': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+#         'can_view_yonalish': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+#         'can_add_guruh': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+#         'can_update_guruh': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+#         'can_delete_guruh': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+#         'can_view_guruh': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+#         'can_add_user': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+#         'can_update_user': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+#         'can_delete_user': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+#         'full_access': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+#
+#     }
+#
+#     labels = {
+#         'username': 'Login',
+#         'password': 'Parol',
+#         'can_add_faculty': 'Fakultet qo`shish',
+#         'can_update_faculty': 'Fakultetni tahrirlash',
+#         'can_delete_faculty': 'Fakultetni o`chirish',
+#         'can_view_faculty': 'Fakultetni ko`rish',
+#         'can_add_yonalish': 'Yonalish qo`shish',
+#         'can_update_yonalish': 'Yonalishni tahrirlash',
+#         'can_delete_yonalish': 'Yonalishni o\'chirish',
+#         'can_view_yonalish': 'Yonalar ko\'rish',
+#         'can_add_guruh': 'Guruh qo\'shish',
+#         'can_update_guruh': 'Guruhni tahrirlash',
+#         'can_delete_guruh': 'Guruhni o\'chirish',
+#         'can_view_guruh': 'Guruhni ko\'rish',
+#         'can_add_user': 'Foydalanuvchi qo\'shish',
+#         'can_update_user': 'Foydalanuvchini tahrirlash',
+#         'can_delete_user': 'Foydalanuvchini o\'chirish',
+#         'full_access': 'Barcha huquqlar',
+#
+#     }
+#
+#     class Meta:
+#         model = UserOrg
+#
+
+
+class UserRule(forms.ModelForm):
+    class Meta:
+        model = UserRules
+        fields = ['username', 'password', 'movqesi','full_access','can_add_faculty', 'can_update_faculty', 'can_delete_faculty',
+                  'can_view_faculty', 'can_add_yonalish', 'can_update_yonalish', 'can_delete_yonalish',
+                  'can_view_yonalish', 'can_add_guruh', 'can_update_guruh', 'can_delete_guruh', 'can_view_guruh',
+                  'can_add_user', 'can_update_user', 'can_delete_user','can_view_user']
+
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control'}),
+            'password': forms.PasswordInput(attrs={'class': 'form-control'}),
+            'movqesi': forms.TextInput(attrs={'class': 'form-control'}),
+            'can_add_faculty': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'can_update_faculty': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'can_delete_faculty': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'can_view_faculty': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'can_add_yonalish': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'can_update_yonalish': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'can_delete_yonalish': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'can_view_yonalish': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'can_add_guruh': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'can_update_guruh': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'can_delete_guruh': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'can_view_guruh': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'can_add_user': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'can_update_user': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'can_delete_user': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'full_access': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'can_view_user': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+
+        }
+
+        labels = {
+            'username': 'Login',
+            'password': 'Parol',
+            'movqesi': 'Mavqesi',
+            'can_add_faculty': 'Fakultet qo`shish',
+            'can_update_faculty': 'Fakultetni tahrirlash',
+            'can_delete_faculty': 'Fakultetni o`chirish',
+            'can_view_faculty': 'Fakultetni ko`rish',
+            'can_add_yonalish': 'Yonalish qo`shish',
+            'can_update_yonalish': 'Yonalishni tahrirlash',
+            'can_delete_yonalish': 'Yonalishni o\'chirish',
+            'can_view_yonalish': 'Yonalar ko\'rish',
+            'can_add_guruh': 'Guruh qo\'shish',
+            'can_update_guruh': 'Guruhni tahrirlash',
+            'can_delete_guruh': 'Guruhni o\'chirish',
+            'can_view_guruh': 'Guruhni ko\'rish',
+            'can_add_user': 'Foydalanuvchi qo\'shish',
+            'can_update_user': 'Foydalanuvchini tahrirlash',
+            'can_delete_user': 'Foydalanuvchini o\'chirish',
+            'full_access': 'Barcha huquqlar',
+            'can_view_user': 'Foydalanuvchini ko\'rish',
+        }
+

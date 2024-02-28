@@ -1,3 +1,4 @@
+from django.contrib.sessions.models import Session
 from django.db import transaction
 from django.shortcuts import render
 from django.http import HttpResponse
@@ -9,14 +10,17 @@ from django.contrib import messages
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from guardian.shortcuts import assign_perm
+
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import Permission
 from guardian.models import UserObjectPermission, GroupObjectPermission
 from django.contrib.contenttypes.models import ContentType
-from user.models import Organization, UserOrg, Budjet, Guruh, Shartnoma, Faculty, Yonalish
+from user.models import Organization, UserOrg, Budjet, Guruh, Shartnoma, Faculty, Yonalish, UserRules
 
-from user.forms import LoginForm, FacultyForm, YonalishForm, ShartnomaForm, BudjetForm, GuruhForm
+from user.forms import LoginForm, FacultyForm, YonalishForm, ShartnomaForm, BudjetForm, GuruhForm, ShartmonomaFormSet, \
+    BudjetFormSet, UserRule
+
+from django.contrib.auth import logout as auth_logout
 
 
 def login_view(request):
@@ -27,6 +31,8 @@ def login_view(request):
             password = form.cleaned_data.get('password')
             user = authenticate(username=username, password=password)
             if user:
+                auth_logout(request)
+
                 login(request, user)
                 return redirect('dashboard')
             else:
@@ -111,13 +117,11 @@ def faculty_update(request, pk):
 def faculty_delete(request, pk):
     if request.user.user_permissions.filter(codename='delete_faculty').exists():
         faculty = Faculty.objects.get(id=pk)
-        if request.method == 'POST':
-            faculty.delete()
-            return redirect('dashboard')
-        context = {'faculty': faculty}
+        faculty.delete()
         return redirect('dashboard')
-    messages.error(request, 'You do not have permission to delete faculty')
-    return redirect('dashboard')
+    else:
+        messages.error(request, 'You do not have permission to delete faculty')
+        return redirect('dashboard')
 
 
 @login_required(login_url='login')
@@ -186,13 +190,11 @@ def yonalish_update(request, pk):
 def yonalish_delete(request, pk):
     if request.user.user_permissions.filter(codename='delete_yonalish').exists():
         yonalish = Yonalish.objects.get(id=pk)
-        if request.method == 'POST':
-            yonalish.delete()
-            return redirect('yonalishlar')
-        context = {'yonalish': yonalish}
+        yonalish.delete()
         return redirect('yonalishlar')
-    messages.error(request, 'You do not have permission to delete yonalish')
-    return redirect('yonalishlar')
+    else:
+        messages.error(request, 'You do not have permission to delete yonalish')
+        return redirect('yonalishlar')
 
 
 @login_required(login_url='login')
@@ -204,12 +206,12 @@ def guruh_list(request):
         if UserOrg.objects.filter(user=request.user).exists():
             org = UserOrg.objects.get(user=request.user).org
             guruh = Guruh.objects.filter(org=org)
-            context = {'guruh': guruh, 'form': form, 'shartmonoma': shartmonoma, 'budjet': budjet}
+            context = {'groups': guruh, 'form': form, 'shartmonoma': shartmonoma, 'budjet': budjet}
             return render(request, 'pages/tables.html', context)
         if Organization.objects.filter(user=request.user).exists():
             org = Organization.objects.get(user=request.user)
             guruh = Guruh.objects.filter(org=org)
-            context = {'guruh': guruh, 'form': form, 'shartmonoma': shartmonoma, 'budjet': budjet}
+            context = {'groups': guruh, 'form': form, 'shartmonoma': shartmonoma, 'budjet': budjet}
             return render(request, 'pages/tables.html', context)
         else:
             return render(request, 'pages/tables.html', {'form': form, 'shartmonoma': shartmonoma, 'budjet': budjet})
@@ -218,42 +220,50 @@ def guruh_list(request):
 
 @login_required(login_url='login')
 def guruh_create(request):
+    form = GuruhForm()
+    shartmonoma = ShartmonomaFormSet()
+    budjet = BudjetFormSet()
+
+    context = {
+        'form': form,
+        'shartmonoma': shartmonoma,
+        'budjet': budjet
+    }
     if request.user.user_permissions.filter(codename='add_guruh').exists():
         if request.method == 'POST':
             form = GuruhForm(request.POST, user=request.user)
-            budjet = BudjetForm(request.POST)
-            shartmonoma = ShartnomaForm(request.POST)
+            budjet = BudjetFormSet(request.POST)
+            shartmonoma = ShartmonomaFormSet(request.POST)
+
             if form.is_valid() and budjet.is_valid() and shartmonoma.is_valid():
                 name = form.cleaned_data.get('name')
                 yonalish = form.cleaned_data.get('yonalish')
                 if UserOrg.objects.filter(user=request.user).exists():
                     org = UserOrg.objects.get(user=request.user).org
+                    print('------------111111111111-----------------------')
                     with transaction.atomic():
                         guruh = Guruh(name=name, yonalish=yonalish, org=org)
                         guruh.save()
-                        shartmonoma = Shartnoma(jami=shartmonoma.cleaned_data.get('jami'),
-                                                harbiy=shartmonoma.cleaned_data.get('harbiy'),
-                                                xotin_qiz=shartmonoma.cleaned_data.get('xotin_qiz'), guruh=guruh)
+                        shartmonoma.save(commit=False)
+                        shartmonoma.instance = guruh
                         shartmonoma.save()
-                        budjet = Budjet(jami=budjet.cleaned_data.get('jami'), harbiy=budjet.cleaned_data.get('harbiy'),
-                                        xotin_qiz=budjet.cleaned_data.get('xotin_qiz'), guruh=guruh)
+                        budjet.save(commit=False)
+                        budjet.instance = guruh
                         budjet.save()
                         return redirect('guruh')
                 if Organization.objects.filter(user=request.user).exists():
                     org = Organization.objects.get(user=request.user)
+                    print('------------222222222222-----------------------')
                     with transaction.atomic():
                         guruh = Guruh(name=name, yonalish=yonalish, org=org)
                         guruh.save()
-                        shartmonoma = Shartnoma(jami=shartmonoma.cleaned_data.get('jami'),
-                                                harbiy=shartmonoma.cleaned_data.get('harbiy'),
-                                                xotin_qiz=shartmonoma.cleaned_data.get('xotin_qiz'), guruh=guruh)
+                        shartmonoma.save(commit=False)
+                        shartmonoma.instance = guruh
                         shartmonoma.save()
-                        budjet = Budjet(jami=budjet.cleaned_data.get('jami'), harbiy=budjet.cleaned_data.get('harbiy'),
-                                        xotin_qiz=budjet.cleaned_data.get('xotin_qiz'), guruh=guruh)
-                        budjet.save()
                         return redirect('guruh')
         else:
-            return redirect('guruhlar')
+
+            return render(request, 'baseapp/group_form.html', context)
     messages.error(request, 'You do not have permission to add guruh')
     return redirect('guruh')
 
@@ -263,31 +273,268 @@ def guruh_update(request, pk):
     if request.user.user_permissions.filter(codename='change_guruh').exists():
         guruh = Guruh.objects.get(id=pk)
         form = GuruhForm(instance=guruh, user=request.user)
-        shartmonoma = ShartnomaForm(instance=guruh.shartnoma)
-        budjet = BudjetForm(instance=guruh.budjet)
+        shartmonoma = ShartmonomaFormSet(instance=guruh)
+        budjet = BudjetFormSet(instance=guruh)
         if request.method == 'POST':
             form = GuruhForm(request.POST, instance=guruh, user=request.user)
-            shartmonoma = ShartnomaForm(request.POST, instance=guruh.shartnoma)
-            budjet = BudjetForm(request.POST, instance=guruh.budjet)
+            shartmonoma = ShartmonomaFormSet(request.POST, instance=guruh)
+            budjet = BudjetFormSet(request.POST, instance=guruh)
             if form.is_valid() and shartmonoma.is_valid() and budjet.is_valid():
                 form.save()
                 shartmonoma.save()
                 budjet.save()
                 return redirect('guruh')
-        context = {'form': form, 'shartmonoma': shartmonoma, 'budjet': budjet}
+        context = {
+            'form': form,
+            'shartmonoma': shartmonoma,
+            'budjet': budjet
+        }
         return render(request, 'baseapp/group_form.html', context)
-    messages.error(request, 'You do not have permission to update guruh')
-    return redirect('guruh')
 
 
 @login_required(login_url='login')
 def guruh_delete(request, pk):
     if request.user.user_permissions.filter(codename='delete_guruh').exists():
         guruh = Guruh.objects.get(id=pk)
-        if request.method == 'POST':
-            guruh.delete()
-            return redirect('guruh')
-        context = {'guruh': guruh}
+        guruh.delete()
         return redirect('guruh')
-    messages.error(request, 'You do not have permission to delete guruh')
-    return redirect('guruhlar')
+    else:
+        messages.error(request, 'You do not have permission to delete guruh')
+        return redirect('guruh')
+
+
+@login_required(login_url='login')
+def userlist(request):
+    if request.user.user_permissions.filter(codename='view_user').exists():
+        if UserOrg.objects.filter(user=request.user).exists():
+            org = UserOrg.objects.get(user=request.user).org
+            users = User.objects.filter(userorg__org=org)
+            context = {'users': users}
+            return render(request, 'pages/usercreate.html', context)
+        if Organization.objects.filter(user=request.user).exists():
+            org = Organization.objects.get(user=request.user)
+            users = User.objects.filter(userorg__org=org)
+            context = {'users': users}
+            return render(request, 'pages/usercreate.html', context)
+        return render(request, 'pages/usercreate.html')
+    messages.error(request, 'You do not have permission to view user')
+    return redirect('dashboard')
+
+
+@login_required(login_url='login')
+def user_create(request):
+    if request.user.user_permissions.filter(codename='add_user').exists():
+        if request.method == 'POST':
+            form = UserRule(request.POST)
+            if form.is_valid():
+                username = form.cleaned_data.get('username')
+                password = form.cleaned_data.get('password')
+                user = User.objects.create_user(username=username, password=password)
+                if Organization.objects.filter(user=request.user).exists():
+                    try:
+                        org = Organization.objects.get(user=request.user)
+                        UserOrg.objects.create(user=user, org=org)
+                        UserRules.objects.create(user=user, full_access=form.cleaned_data.get('full_access'),
+                                                 can_view_faculty=form.cleaned_data.get('can_view_faculty'),
+                                                 can_add_faculty=form.cleaned_data.get('can_add_faculty'),
+                                                 can_update_faculty=form.cleaned_data.get('can_update_faculty'),
+                                                 can_delete_faculty=form.cleaned_data.get('can_delete_faculty'),
+                                                 can_view_yonalish=form.cleaned_data.get('can_view_yonalish'),
+                                                 can_add_yonalish=form.cleaned_data.get('can_add_yonalish'),
+                                                 can_update_yonalish=form.cleaned_data.get('can_update_yonalish'),
+                                                 can_delete_yonalish=form.cleaned_data.get('can_delete_yonalish'),
+                                                 can_view_guruh=form.cleaned_data.get('can_view_guruh'),
+                                                 can_add_guruh=form.cleaned_data.get('can_add_guruh'),
+                                                 can_update_guruh=form.cleaned_data.get('can_update_guruh'),
+                                                 can_delete_guruh=form.cleaned_data.get('can_delete_guruh'),
+                                                 can_view_user=form.cleaned_data.get('can_view_user'),
+                                                 can_add_user=form.cleaned_data.get('can_add_user'),
+                                                 can_update_user=form.cleaned_data.get('can_update_user'),
+                                                 can_delete_user=form.cleaned_data.get('can_delete_user'),
+                                                 org=org,
+                                                 username=username,
+                                                 password=password,
+                                                 )
+                        if form.cleaned_data.get('full_access'):
+                            user.user_permissions.add(Permission.objects.get(codename='add_userrulser'))
+                            user.user_permissions.add(Permission.objects.get(codename='change_userrulser'))
+                            user.user_permissions.add(Permission.objects.get(codename='delete_userrulser'))
+                            user.user_permissions.add(Permission.objects.get(codename='view_userrulser'))
+                            user.user_permissions.add(Permission.objects.get(codename='view_user'))
+                            user.user_permissions.add(Permission.objects.get(codename='add_user'))
+                            user.user_permissions.add(Permission.objects.get(codename='change_user'))
+                            user.user_permissions.add(Permission.objects.get(codename='delete_user'))
+                            user.user_permissions.add(Permission.objects.get(codename='view_faculty'))
+                            user.user_permissions.add(Permission.objects.get(codename='add_faculty'))
+                            user.user_permissions.add(Permission.objects.get(codename='change_faculty'))
+                            user.user_permissions.add(Permission.objects.get(codename='delete_faculty'))
+                            user.user_permissions.add(Permission.objects.get(codename='view_yonalish'))
+                            user.user_permissions.add(Permission.objects.get(codename='add_yonalish'))
+                            user.user_permissions.add(Permission.objects.get(codename='change_yonalish'))
+                            user.user_permissions.add(Permission.objects.get(codename='delete_yonalish'))
+                            user.user_permissions.add(Permission.objects.get(codename='view_guruh'))
+                            user.user_permissions.add(Permission.objects.get(codename='add_guruh'))
+                            user.user_permissions.add(Permission.objects.get(codename='change_guruh'))
+                            user.user_permissions.add(Permission.objects.get(codename='delete_guruh'))
+
+                        if form.cleaned_data.get('can_view_faculty'):
+                            user.user_permissions.add(Permission.objects.get(codename='view_faculty'))
+                        if form.cleaned_data.get('can_add_faculty'):
+                            user.user_permissions.add(Permission.objects.get(codename='add_faculty'))
+                        if form.cleaned_data.get('can_update_faculty'):
+                            user.user_permissions.add(Permission.objects.get(codename='change_faculty'))
+                        if form.cleaned_data.get('can_delete_faculty'):
+                            user.user_permissions.add(Permission.objects.get(codename='delete_faculty'))
+                        if form.cleaned_data.get('can_view_yonalish'):
+                            user.user_permissions.add(Permission.objects.get(codename='view_yonalish'))
+                        if form.cleaned_data.get('can_add_yonalish'):
+                            user.user_permissions.add(Permission.objects.get(codename='add_yonalish'))
+                        if form.cleaned_data.get('can_update_yonalish'):
+                            user.user_permissions.add(Permission.objects.get(codename='change_yonalish'))
+                        if form.cleaned_data.get('can_delete_yonalish'):
+                            user.user_permissions.add(Permission.objects.get(codename='delete_yonalish'))
+                        if form.cleaned_data.get('can_view_guruh'):
+                            user.user_permissions.add(Permission.objects.get(codename='view_guruh'))
+                        if form.cleaned_data.get('can_add_guruh'):
+                            user.user_permissions.add(Permission.objects.get(codename='add_guruh'))
+                        if form.cleaned_data.get('can_update_guruh'):
+                            user.user_permissions.add(Permission.objects.get(codename='change_guruh'))
+                        if form.cleaned_data.get('can_delete_guruh'):
+                            user.user_permissions.add(Permission.objects.get(codename='delete_guruh'))
+                        if form.cleaned_data.get('can_view_user'):
+                            user.user_permissions.add(Permission.objects.get(codename='view_user'))
+                        if form.cleaned_data.get('can_add_user'):
+                            user.user_permissions.add(Permission.objects.get(codename='add_user'))
+                        if form.cleaned_data.get('can_update_user'):
+                            user.user_permissions.add(Permission.objects.get(codename='change_user'))
+                        if form.cleaned_data.get('can_delete_user'):
+                            user.user_permissions.add(Permission.objects.get(codename='delete_user'))
+                        return redirect('userlist')
+                    except:
+                        user.delete()
+                        messages.error(request, 'Form is not valid')
+                        return redirect('userlist')
+
+                if UserOrg.objects.filter(user=request.user).exists():
+                    org = UserOrg.objects.get(user=request.user).org
+                    UserOrg.objects.create(user=user, org=org)
+                    UserRules.objects.create(user=user, full_access=form.cleaned_data.get('full_access'),
+                                             can_view_faculty=form.cleaned_data.get('can_view_faculty'),
+                                             can_add_faculty=form.cleaned_data.get('can_add_faculty'),
+                                             can_update_faculty=form.cleaned_data.get('can_update_faculty'),
+                                             can_delete_faculty=form.cleaned_data.get('can_delete_faculty'),
+                                             can_view_yonalish=form.cleaned_data.get('can_view_yonalish'),
+                                             can_add_yonalish=form.cleaned_data.get('can_add_yonalish'),
+                                             can_update_yonalish=form.cleaned_data.get('can_update_yonalish'),
+                                             can_delete_yonalish=form.cleaned_data.get('can_delete_yonalish'),
+                                             can_view_guruh=form.cleaned_data.get('can_view_guruh'),
+                                             can_add_guruh=form.cleaned_data.get('can_add_guruh'),
+                                             can_update_guruh=form.cleaned_data.get('can_update_guruh'),
+                                             can_delete_guruh=form.cleaned_data.get('can_delete_guruh'),
+                                             can_view_user=form.cleaned_data.get('can_view_user'),
+                                             can_add_user=form.cleaned_data.get('can_add_user'),
+                                             can_update_user=form.cleaned_data.get('can_update_user'),
+                                             can_delete_user=form.cleaned_data.get('can_delete_user'),
+                                             org=org,
+                                             username=username,
+                                             password=password,
+                                             )
+                    if form.cleaned_data.get('full_access'):
+                        user.user_permissions.add(Permission.objects.get(codename='view_user'))
+                        user.user_permissions.add(Permission.objects.get(codename='add_user'))
+                        user.user_permissions.add(Permission.objects.get(codename='change_user'))
+                        user.user_permissions.add(Permission.objects.get(codename='delete_user'))
+                        user.user_permissions.add(Permission.objects.get(codename='view_faculty'))
+                        user.user_permissions.add(Permission.objects.get(codename='add_faculty'))
+                        user.user_permissions.add(Permission.objects.get(codename='change_faculty'))
+                        user.user_permissions.add(Permission.objects.get(codename='delete_faculty'))
+                        user.user_permissions.add(Permission.objects.get(codename='view_yonalish'))
+                        user.user_permissions.add(Permission.objects.get(codename='add_yonalish'))
+                        user.user_permissions.add(Permission.objects.get(codename='change_yonalish'))
+                        user.user_permissions.add(Permission.objects.get(codename='delete_yonalish'))
+                        user.user_permissions.add(Permission.objects.get(codename='view_guruh'))
+                        user.user_permissions.add(Permission.objects.get(codename='add_guruh'))
+                        user.user_permissions.add(Permission.objects.get(codename='change_guruh'))
+                        user.user_permissions.add(Permission.objects.get(codename='delete_guruh'))
+
+                    if form.cleaned_data.get('can_view_faculty'):
+                        user.user_permissions.add(Permission.objects.get(codename='view_faculty'))
+                    if form.cleaned_data.get('can_add_faculty'):
+                        user.user_permissions.add(Permission.objects.get(codename='add_faculty'))
+                    if form.cleaned_data.get('can_update_faculty'):
+                        user.user_permissions.add(Permission.objects.get(codename='change_faculty'))
+                    if form.cleaned_data.get('can_delete_faculty'):
+                        user.user_permissions.add(Permission.objects.get(codename='delete_faculty'))
+                    if form.cleaned_data.get('can_view_yonalish'):
+                        user.user_permissions.add(Permission.objects.get(codename='view_yonalish'))
+                    if form.cleaned_data.get('can_add_yonalish'):
+                        user.user_permissions.add(Permission.objects.get(codename='add_yonalish'))
+                    if form.cleaned_data.get('can_update_yonalish'):
+                        user.user_permissions.add(Permission.objects.get(codename='change_yonalish'))
+                    if form.cleaned_data.get('can_delete_yonalish'):
+                        user.user_permissions.add(Permission.objects.get(codename='delete_yonalish'))
+                    if form.cleaned_data.get('can_view_guruh'):
+                        user.user_permissions.add(Permission.objects.get(codename='view_guruh'))
+                    if form.cleaned_data.get('can_add_guruh'):
+                        user.user_permissions.add(Permission.objects.get(codename='add_guruh'))
+                    if form.cleaned_data.get('can_update_guruh'):
+                        user.user_permissions.add(Permission.objects.get(codename='change_guruh'))
+                    if form.cleaned_data.get('can_delete_guruh'):
+                        user.user_permissions.add(Permission.objects.get(codename='delete_guruh'))
+                    if form.cleaned_data.get('can_view_user'):
+                        user.user_permissions.add(Permission.objects.get(codename='view_user'))
+                    if form.cleaned_data.get('can_add_user'):
+                        user.user_permissions.add(Permission.objects.get(codename='add_user'))
+                    if form.cleaned_data.get('can_update_user'):
+                        user.user_permissions.add(Permission.objects.get(codename='change_user'))
+                    if form.cleaned_data.get('can_delete_user'):
+                        user.user_permissions.add(Permission.objects.get(codename='delete_user'))
+                    return redirect('userlist')
+                return redirect('userlist')
+            else:
+                messages.error(request, 'Form is not valid')
+                return redirect('userlist')
+
+
+        else:
+            form = UserRule()
+            return render(request, 'baseapp/user_form.html', {'form': form})
+    messages.error(request, 'You do not have permission to add user')
+    return redirect('userlist')
+
+
+@login_required(login_url='login')
+def user_update(request, pk):
+    if request.user.user_permissions.filter(codename='change_user').exists():
+        user = User.objects.get(id=pk)
+        form = UserRule(instance=user)
+        if request.method == 'POST':
+            form = UserRule(request.POST, instance=user)
+            if form.is_valid():
+                # find user rules and change
+                if UserOrg.objects.filter(user=request.user).exists():
+                    org = UserOrg.objects.get(user=request.user).org
+                    user_rules = UserRules.objects.get(user=user, org=org)
+                    user_rules.full_access = form.cleaned_data.get('full_access')
+                    user_rules.can_view_faculty = form.cleaned_data.get('can_view_faculty')
+                    user_rules.can_add_faculty = form.cleaned_data.get('can_add_faculty')
+                    user_rules.can_update_faculty = form.cleaned_data.get('can_update_faculty')
+                    user_rules.can_delete_faculty = form.cleaned_data.get('can_delete_faculty')
+                    user_rules.can_view_yonalish = form.cleaned_data.get('can_view_yonalish')
+                    user_rules.can_add_yonalish = form.cleaned_data.get('can_add_yonalish')
+                    user_rules.can_update_yonalish = form.cleaned_data.get('can_update_yonalish')
+                    user_rules.can_delete_yonalish = form.cleaned_data.get('can_delete_yonalish')
+                    user_rules.can_view_guruh = form.cleaned_data.get('can_view_guruh')
+                    user_rules.can_add_guruh = form.cleaned_data.get('can_add_guruh')
+                    user_rules.can_update_guruh = form.cleaned_data.get('can_update_guruh')
+                    user_rules.can_delete_guruh = form.cleaned_data.get('can_delete_guruh')
+                    user_rules.can_view_user = form.cleaned_data.get('can_view_user')
+                    user_rules.can_add_user = form.cleaned_data.get('can_add_user')
+                    user_rules.can_update_user = form.cleaned_data.get('can_update_user')
+                    user_rules.can_delete_user = form.cleaned_data.get('can_delete_user')
+                    user_rules.save()
+                    # find user and change
+                    user.username = form.cleaned_data.get('username')
+                    user.set_password(form.cleaned_data.get('password'))
+                    user.save()
+                    return redirect('userlist')
