@@ -8,11 +8,11 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 
-class   UserRules(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+class UserRules(models.Model):
     org = models.ForeignKey('Organization', on_delete=models.CASCADE, null=True, blank=True)
     movqesi = models.CharField(max_length=100)
     password = models.CharField(max_length=100, null=True, blank=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     username = models.CharField(max_length=100, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     can_add_faculty = models.BooleanField(default=False)
@@ -26,12 +26,13 @@ class   UserRules(models.Model):
     can_delete_guruh = models.BooleanField(default=False)
     can_view_faculty = models.BooleanField(default=False)
     can_view_yonalish = models.BooleanField(default=False)
-    can_view_guruh = models.BooleanField(default=   False)
+    can_view_guruh = models.BooleanField(default=False)
     full_access = models.BooleanField(default=False)
     can_delete_user = models.BooleanField(default=False)
     can_add_user = models.BooleanField(default=False)
     can_update_user = models.BooleanField(default=False)
     can_view_user = models.BooleanField(default=False)
+
     def assign_perm(self, user, perm_codename):
         content_type = ContentType.objects.get_for_model(self.__class__)
         permission = Permission.objects.get(
@@ -111,7 +112,7 @@ class Yonalish(models.Model):
     faculty = models.ForeignKey(Faculty, on_delete=models.SET_NULL, blank=True, null=True,
                                 related_name='facultyyonalish')
     created_at = models.DateTimeField(auto_now_add=True)
-
+    code = models.CharField(max_length=100, null=True, blank=True)
     turi_choices = (
         ('Kunduzgi', 'Kunduzgi'),
         ('Sirtqi', 'Sirtqi'),

@@ -6,6 +6,7 @@ from guardian.admin import GuardedModelAdmin
 from .models import UserOrg, Organization,Faculty, Yonalish, Shartnoma, Budjet, Guruh,UserRules
 
 admin.site.register(Organization, GuardedModelAdmin)
+admin.site.register(Guruh)
 # permission = Permission.objects.get(codename='can_view')
 admin.site.register(UserRules)
 admin.site.register(Permission)

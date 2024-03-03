@@ -3,7 +3,7 @@ from django.forms import inlineformset_factory
 from django.contrib.auth.models import User
 from django.http import request
 
-from user.models import Guruh, Budjet, Shartnoma, Faculty, Yonalish, UserOrg, Organization,UserRules
+from user.models import Guruh, Budjet, Shartnoma, Faculty, Yonalish, UserOrg, Organization, UserRules
 
 
 class UserOrgForm(forms.ModelForm):
@@ -160,10 +160,11 @@ class FacultyForm(forms.ModelForm):
 class YonalishForm(forms.ModelForm):
     class Meta:
         model = Yonalish
-        fields = ['name', 'faculty', 'turi', 'language']
+        fields = ['name', 'faculty', 'turi', 'language','code']
 
         labels = {
             'name': 'Nomi',
+            'code':'Ko\'di',
             'faculty': 'Fakultet',
             'turi': 'Turi',
             'language': 'Tili'
@@ -171,9 +172,11 @@ class YonalishForm(forms.ModelForm):
 
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'code': forms.TextInput(attrs={'class': 'form-control'}),
             'faculty': forms.Select(attrs={'class': 'form-control'}),
             'turi': forms.Select(attrs={'class': 'form-control'}),
-            'language': forms.Select(attrs={'class': 'form-control'})
+            'language': forms.Select(attrs={'class': 'form-control'}),
+
         }
 
     def __init__(self, *args, **kwargs):
@@ -291,14 +294,15 @@ class LoginForm(forms.Form):
 class UserRule(forms.ModelForm):
     class Meta:
         model = UserRules
-        fields = ['username', 'password', 'movqesi','full_access','can_add_faculty', 'can_update_faculty', 'can_delete_faculty',
+        fields = ['username', 'password', 'movqesi', 'full_access', 'can_add_faculty', 'can_update_faculty',
+                  'can_delete_faculty',
                   'can_view_faculty', 'can_add_yonalish', 'can_update_yonalish', 'can_delete_yonalish',
                   'can_view_yonalish', 'can_add_guruh', 'can_update_guruh', 'can_delete_guruh', 'can_view_guruh',
-                  'can_add_user', 'can_update_user', 'can_delete_user','can_view_user']
+                  'can_add_user', 'can_update_user', 'can_delete_user', 'can_view_user']
 
         widgets = {
             'username': forms.TextInput(attrs={'class': 'form-control'}),
-            'password': forms.PasswordInput(attrs={'class': 'form-control'}),
+            'password': forms.TextInput(attrs={'class': 'form-control'}),
             'movqesi': forms.TextInput(attrs={'class': 'form-control'}),
             'can_add_faculty': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'can_update_faculty': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
@@ -342,4 +346,17 @@ class UserRule(forms.ModelForm):
             'full_access': 'Barcha huquqlar',
             'can_view_user': 'Foydalanuvchini ko\'rish',
         }
+
+
+
+class UserRuleUpdate(forms.ModelForm):
+
+    class Meta:
+        model = UserRules
+        fields = '__all__'
+        exclude = ['user', 'org']
+
+
+
+
 
