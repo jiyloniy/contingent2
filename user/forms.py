@@ -64,11 +64,16 @@ class GuruhForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
         super(GuruhForm, self).__init__(*args, **kwargs)
+
         if user:
             if UserOrg.objects.filter(user=user).exists():
-                self.fields['yonalish'].queryset = Yonalish.objects.filter(org=UserOrg.objects.get(user=user).org)
-            if Organization.objects.filter(user=user).exists():
-                self.fields['yonalish'].queryset = Yonalish.objects.filter(org=Organization.objects.get(user=user))
+                org = UserOrg.objects.get(user=user).org
+                self.fields['yonalish'].queryset = Yonalish.objects.filter(org=org)
+            elif Organization.objects.filter(user=user).exists():
+                org = Organization.objects.get(user=user)
+                self.fields['yonalish'].queryset = Yonalish.objects.filter(org=org)
+        else:
+            self.fields['yonalish'].queryset = Yonalish.objects.none()
 
 
 class BudjetForm(forms.ModelForm):
@@ -160,14 +165,15 @@ class FacultyForm(forms.ModelForm):
 class YonalishForm(forms.ModelForm):
     class Meta:
         model = Yonalish
-        fields = ['name', 'faculty', 'turi', 'language','code']
+        fields = ['name', 'faculty', 'turi', 'language','code','mutahasislik_2']
 
         labels = {
             'name': 'Nomi',
             'code':'Ko\'di',
             'faculty': 'Fakultet',
             'turi': 'Turi',
-            'language': 'Tili'
+            'language': 'Tili',
+            'mutahasislik_2':'2-mutahasislik'
         }
 
         widgets = {
@@ -176,6 +182,7 @@ class YonalishForm(forms.ModelForm):
             'faculty': forms.Select(attrs={'class': 'form-control'}),
             'turi': forms.Select(attrs={'class': 'form-control'}),
             'language': forms.Select(attrs={'class': 'form-control'}),
+            'mutahasislik_2': forms.CheckboxInput(attrs={'class': 'form-check-input'})
 
         }
 

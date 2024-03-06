@@ -190,14 +190,15 @@ def yonalish_create(request):
                 faculty = form.cleaned_data.get('faculty')
                 turi = form.cleaned_data.get('turi')
                 language = form.cleaned_data.get('language'),
-                code = form.cleaned_data.get('code')
+                code = form.cleaned_data.get('code'),
+                mutahasislik_2 = form.cleaned_data.get('mutahasislik_2')
                 if UserOrg.objects.filter(user=request.user).exists():
                     org = UserOrg.objects.get(user=request.user).org
-                    yonalish = Yonalish(name=name, faculty=faculty, turi=turi, language=language, org=org, code=code)
+                    yonalish = Yonalish(name=name, faculty=faculty, turi=turi, language=language, org=org, code=code,mutahasislik_2=mutahasislik_2)
                     yonalish.save()
                 if Organization.objects.filter(user=request.user).exists():
                     org = Organization.objects.get(user=request.user)
-                    yonalish = Yonalish(name=name, faculty=faculty, turi=turi, language=language, org=org, code=code)
+                    yonalish = Yonalish(name=name, faculty=faculty, turi=turi, language=language, org=org, code=code,mutahasislik_2=mutahasislik_2)
                     yonalish.save()
 
         else:
@@ -280,6 +281,7 @@ def guruh_create(request):
                 chetlashtirilgan_students = form.cleaned_data.get('chetlashtirilgan_students')
                 akademik = form.cleaned_data.get('akademik')
                 bosqich = form.cleaned_data.get('bosqich')
+
                 if UserOrg.objects.filter(user=request.user).exists():
                     org = UserOrg.objects.get(user=request.user).org
 

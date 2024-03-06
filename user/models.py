@@ -59,6 +59,7 @@ class UserRules(models.Model):
 class Organization(models.Model):
     user = models.ForeignKey(User, models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=100)
+    full_name = models.CharField(max_length=100, blank=True, null=True, default='Sining universitetingiz nomi')
     created_at = models.DateTimeField(auto_now_add=True)
     img = models.ImageField(upload_to='organization/', null=True, blank=True)
 
@@ -126,6 +127,7 @@ class Yonalish(models.Model):
         ('Rus', 'Rus'),
     )
     language = models.CharField(max_length=100, choices=choises_uzb_rus, default='O\'zbek')
+    mutahasislik_2 = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -135,7 +137,7 @@ class Yonalish(models.Model):
 
 
 class Shartnoma(models.Model):
-    guruh = models.ForeignKey('Guruh', on_delete=models.CASCADE)
+    guruh = models.ForeignKey('Guruh', on_delete=models.CASCADE, related_name='guruhshartnoma')
     jami = models.IntegerField(default=0)
     harbiy = models.IntegerField(default=0)
     xotin_qiz = models.IntegerField(default=0)
@@ -149,7 +151,7 @@ class Shartnoma(models.Model):
 
 
 class Budjet(models.Model):
-    guruhi = models.ForeignKey('Guruh', on_delete=models.CASCADE)
+    guruhi = models.ForeignKey('Guruh', on_delete=models.CASCADE, related_name='guruhbudjet')
     jami = models.IntegerField(default=0)
     harbiy = models.IntegerField(default=0)
     xotin_qiz = models.IntegerField(default=0)
@@ -187,8 +189,8 @@ class Guruh(models.Model):
     type_choices = (
         ('Bakalavr', 'Bakalavr'),
         ('Magistr', 'Magistr'),
-        ('Aspirantura', 'Aspirantura'),
         ('Doktorantura', 'Doktorantura'),
+
     )
     bosqich = models.CharField(max_length=100, choices=type_choices, default='Bakalavr')
 
