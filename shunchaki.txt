@@ -1,53 +1,103 @@
+yonalishlar = Yonalish.objects.filter(org=org)
 
-ws.merge_cells('A1:P2')
-set_cell_properties(ws.cell(row=1, column=1),
-                    f"{organization_name} talabalari kontingentining {formatted_time} holati haqida umumiy ma'lumot",
-                    Alignment(horizontal='center', vertical='center'),
-                    Font(name=FONT_NAME, size=20, bold=True, italic=False, color=FONT_COLOR),
-                    Border(left=Side(border_style=BORDER_STYLE, color=BORDER_COLOR),
-                           right=Side(border_style=BORDER_STYLE, color=BORDER_COLOR),
-                           top=Side(border_style=BORDER_STYLE, color=BORDER_COLOR),
-                           bottom=Side(border_style=BORDER_STYLE, color=BORDER_COLOR)))
+    yonalish_kunduzgi = Yonalish.objects.filter(org=org, turi='Kunduzgi',mutahasislik_2=False).exclude(yonalishguruh__bosqich='Magistr')
+    yonalish_kunduzgi = yonalish_kunduzgi.exclude(mutahasislik_2=True)
+    yonalish_sirtqi = yonalishlar.filter(turi='Sirtqi')
+    yonalish_masofaviy = yonalishlar.filter(turi='Masofaviy')
+    kurs_jami = 0
+    jami_full = 0
+    row = 5
+    for kunduzgi_yonlaish in yonalish_kunduzgi:
+        jami = 0
+        kurs = Guruh.objects.filter(org=org, yonalish=kunduzgi_yonlaish).values('kurs').distinct()
+        budget = Guruh.objects.filter(org=org, yonalish=kunduzgi_yonlaish).aggregate(
+            jami=Sum('guruhbudjet__jami'))
+        shartnoma = Guruh.objects.filter(org=org, yonalish=kunduzgi_yonlaish).aggregate(
+            jami=Sum('guruhshartnoma__jami'))
+        if budget['jami']:
+            jami += budget['jami']
+            jami_full += budget['jami']
+        if shartnoma['jami']:
+            jami += shartnoma['jami']
+            jami_full += shartnoma['jami']
+        if jami != 0:
+            ws.cell(row=row, column=1, value=row - 4)
+            ws.cell(row=row, column=2, value=kunduzgi_yonlaish.name)
+            ws.cell(row=row, column=3, value='Kunduzgi')
+            ws.cell(row=row, column=4, value=jami)
+            if kunduzgi_yonlaish.language == 'O\'zbek':
+                ws.cell(row=row, column=5, value=jami)
+                ws.cell(row=row, column=6, value=0)
+            else:
+                ws.cell(row=row, column=5, value=0)
+                ws.cell(row=row, column=6, value=jami)
 
-cell_properties = [
-    {'row': 3, 'column': 3, 'value': 'Guruhlar', 'width': True, 'merge': 'C3:C4'},
-    {'row': 3, 'column': 4, 'value': 'Yo\'nalish', 'width': True, 'merge': 'D3:D4'},
-    {'row': 3, 'column': 5, 'value': 'Jami', 'width': True, 'merge': 'E3:E4'},
-    {'row': 3, 'column': 6, 'value': 'Shundan qizlar', 'width': True, 'merge': 'F3:F4'},
-    {'row': 3, 'column': 7, 'value': 'Harbiy', 'width': True, 'merge': 'G3:G4'},
-    {'row': 3, 'column': 8, 'value': 'Yangi qo\'shilgan', 'width': True, 'merge': 'H3:H4'},
-    {'row': 3, 'column': 9, 'value': 'Chetlashtirilgan', 'width': True, 'merge': 'I3:I4'},
-    {'row': 3, 'column': 10, 'value': 'Akademik tatil', 'width': True, 'merge': 'J3:J4'},
-    {'row': 3, 'column': 11, 'value': 'Byudjet', 'width': True, 'merge': 'K3:M3'},
-    {'row': 4, 'column': 11, 'value': 'Jami', 'width': True},
-    {'row': 4, 'column': 12, 'value': 'Harbiy', 'width': True},
-    {'row': 4, 'column': 13, 'value': 'Xotn qizlar', 'width': True},
-    {'row': 3, 'column': 14, 'value': 'Shartmona', 'width': True, 'merge': 'N3:P3'},
-    {'row': 4, 'column': 14, 'value': 'Jami', 'width': True},
-    {'row': 4, 'column': 15, 'value': 'Harbiy', 'width': True},
-    {'row': 4, 'column': 16, 'value': 'Xotn qizlar', 'width': True},
+            for k in kurs:
+                print(k['kurs'])
+                jami = 0
+                budget = Budjet.objects.filter(guruhi__org=org, guruhi__yonalish=kunduzgi_yonlaish,
+                                               guruhi__kurs=k['kurs']).aggregate(
+                    jami=Sum('jami'))
+                shartnoma = Shartnoma.objects.filter(guruh__org=org, guruh__yonalish=kunduzgi_yonlaish,
+                                                     guruh__kurs=k['kurs']).aggregate(
+                    jami=Sum('jami'))
+                if budget['jami']:
+                    jami += budget['jami']
 
-    # Add more dictionaries for other cells
-]
+                if shartnoma['jami']:
+                    jami += shartnoma['jami']
 
-for properties in cell_properties:
-    cell = ws.cell(row=properties['row'], column=properties['column'])
-    set_cell_properties(cell,
-                        properties['value'],
-                        Alignment(horizontal='center', vertical='center'),
-                        Font(name=FONT_NAME, size=FONT_SIZE, bold=True, italic=False, color=FONT_COLOR),
-                        Border(left=Side(border_style=BORDER_STYLE, color=BORDER_COLOR),
-                               right=Side(border_style=BORDER_STYLE, color=BORDER_COLOR),
-                               top=Side(border_style=BORDER_STYLE, color=BORDER_COLOR),
-                               bottom=Side(border_style=BORDER_STYLE, color=BORDER_COLOR)))
-    if 'width' in properties and properties['width']:
-        ws.column_dimensions[get_column_letter(properties['column'])].auto_size = True
-    if 'merge' in properties:
-        ws.merge_cells(properties['merge'])
+                if k['kurs'] == 1 and kunduzgi_yonlaish.language == 'O\'zbek':
+                    ws.cell(row=row, column=7, value=jami)
+                    ws.cell(row=row, column=8, value=jami)
+                    ws.cell(row=row, column=9, value=0)
+                elif k['kurs'] == 1 and kunduzgi_yonlaish.language == 'Rus':
+                    ws.cell(row=row, column=7, value=jami)
+                    ws.cell(row=row, column=8, value=0)
+                    ws.cell(row=row, column=9, value=jami)
+                elif k['kurs'] == 2 and kunduzgi_yonlaish.language == 'O\'zbek':
+                    ws.cell(row=row, column=10, value=jami)
+                    ws.cell(row=row, column=11, value=jami)
+                    ws.cell(row=row, column=12, value=0)
+                elif k['kurs'] == 2 and kunduzgi_yonlaish.language == 'Rus':
+                    ws.cell(row=row, column=10, value=jami)
+                    ws.cell(row=row, column=11, value=0)
+                    ws.cell(row=row, column=12, value=jami)
+                elif k['kurs'] == 3 and kunduzgi_yonlaish.language == 'O\'zbek':
+                    ws.cell(row=row, column=13, value=jami)
+                    ws.cell(row=row, column=14, value=jami)
+                    ws.cell(row=row, column=15, value=0)
+                elif k['kurs'] == 3 and kunduzgi_yonlaish.language == 'Rus':
+                    ws.cell(row=row, column=13, value=jami)
+                    ws.cell(row=row, column=14, value=0)
+                    ws.cell(row=row, column=15, value=jami)
+                elif k['kurs'] == 4 and kunduzgi_yonlaish.language == 'O\'zbek':
+                    ws.cell(row=row, column=16, value=jami)
+                    ws.cell(row=row, column=17, value=jami)
+                    ws.cell(row=row, column=18, value=0)
+                elif k['kurs'] == 4 and kunduzgi_yonlaish.language == 'Rus':
+                    ws.cell(row=row, column=16, value=jami)
+                    ws.cell(row=row, column=17, value=0)
+                    ws.cell(row=row, column=18, value=jami)
+                elif k['kurs'] == 5 and kunduzgi_yonlaish.language == 'O\'zbek':
+                    ws.cell(row=row, column=19, value=jami)
+                    ws.cell(row=row, column=20, value=jami)
+                    ws.cell(row=row, column=21, value=0)
+                elif k['kurs'] == 5 and kunduzgi_yonlaish.language == 'Rus':
+                    ws.cell(row=row, column=19, value=jami)
+                    ws.cell(row=row, column=20, value=0)
+                    ws.cell(row=row, column=21, value=jami)
+                elif k['kurs'] == 6 and kunduzgi_yonlaish.language == 'O\'zbek':
+                    ws.cell(row=row, column=22, value=jami)
+                    ws.cell(row=row, column=23, value=jami)
+                    ws.cell(row=row, column=24, value=0)
+                elif k['kurs'] == 6 and kunduzgi_yonlaish.language == 'Rus':
+                    ws.cell(row=row, column=22, value=jami)
+                    ws.cell(row=row, column=23, value=0)
+                    ws.cell(row=row, column=24, value=jami)
+            row += 1
 
-# d ustunni hammasiniblue qilish kerak FAQAT TEXTNI
-
-
-coluns = ['C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']
-for col in coluns:
-    ws.column_dimensions[col].width = 17
+            ws.cell(row=row, column=2, value='Jami')
+            ws.cell(row=row, column=4, value=jami_full)
+    row += 1
+    jami_full =0

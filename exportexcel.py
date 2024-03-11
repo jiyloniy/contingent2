@@ -4555,5 +4555,6 @@ def exporttoexcel(org):
                                                        fill_type="solid")
         row += 1
 
-    wb.save('talabalar.xlsx')
+    wb.save('talabalar2222.xlsx')
 
+exporttoexcel(org)

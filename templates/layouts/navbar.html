@@ -5,55 +5,44 @@
         <div class="icon_setting"></div>
         <div class="user_profle_side">
             <div class="user_img"><img class="img-responsive"
-                                       src="{% static 'images/logo/photo_2023-01-10_11-51-55.jpg' %}" alt="#">
-            </div>
+                                       src="{% static 'images/logo/photo_2023-01-10_11-51-55.jpg' %}" alt="#"></div>
             <div class="user_info">
                 <p><span class="online_animation"></span> active</p>
             </div>
         </div>
     </div>
     <div class="sidebar_blog_2">
-
-        <h4>Korea Internatioanl University In Ferghana</h4>
-
-        <ul class="list-unstyled components">
-            {% if perms.user.view_faculty %}
-                <li class="active">
-                    <a href="{% url 'dashboard' %}"><i class="fa fa-graduation-cap"></i> <span>Fakultetlar</span></a>
+        <h4>Korea International University In Ferghana</h4>
+        <div class="sidebar_3">
+            <ul class="list-unstyled components">
+                <li class="activetime">
+                    <img class="" src="{% static 'images/logo/photo_2023-01-10_11-51-55.jpg' %}" alt="#"
+                         style="border-radius: 50%; width: 50px; height: 50px; margin-top: 10px; margin-bottom: 10px; ">
+                    <span class="online_animation"
+                          style="position: absolute; margin-top: 7px; width: 55px; height: 55px; left:17.5px; z-index: -1;"></span>
                 </li>
-            {% endif %}
+                <li  {% if '/dashboard/' in request.path %} class="actives" {% endif %} >
+                    <a href="{% url 'dashboard' %}"><i class="fa fa-graduation-cap"></i> <span>Faculty</span></a>
+                </li>
+                <li {% if '/guruh/' in request.path %} class="actives" {% endif %}><a href="{% url 'guruh' %}"><i class="fa fa-users"></i> <span>Groups</span></a></li>
 
 
-            {% if perms.user.view_yonalish %}
-                <li><a href="{% url 'yonalishlar' %}"><i class="fa fa-bars"></i> <span>Yo`nalishlar</span></a></li>
-            {% endif %}
-
-
-            {% if perms.user.view_guruh %}
-
-                <li><a href="{% url 'guruh' %}"><i class="fa fa-users"></i> <span>Groups</span></a></li>
-            {% endif %}
-
-
-            <li>
-                {% if perms.user.view_userrulser %}
-                <div class="dropdown">
-                    <a class="dropdown-toggle" href="" role="button" id="dropdownMenuLink"
-                       data-toggle="dropdown" aria-expanded="false">
-                        <i class="fa fa-ellipsis-h"></i>
-                        Rules
-                    </a>
-
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                        {% if perms.user.view_userrulser %}
-                        <li><a class="dropdown-item" href="{% url 'userlist' %}">user create</a></li>
-                        {% endif %}
-                        <li><a class="dropdown-item" href="rule.html">rules</a></li>
-                    </ul>
-                </div>
-                {% endif %}
-            </li>
-        </ul>
+                <li {% if '/yonalish/' in request.path %} class="actives" {% endif %} ><a href="{% url 'yonalishlar' %}"><i class="fa fa-bars"></i> <span>Yonalishlar</span></a></li>
+                <li>
+                    <div class="dropdown">
+                        <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown"
+                           aria-expanded="false">
+                            <i class="fa fa-ellipsis-h"></i>
+                            Rules
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                            <li {% if '/userlist/' in request.path %} class="actives" {% endif %}><a class="dropdown-item" href="{% url 'userlist' %}">user create</a></li>
+                            <li><a class="dropdown-item" href="rule.html">rules</a></li>
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+        </div>
     </div>
 </nav>
 <!-- end sidebar -->

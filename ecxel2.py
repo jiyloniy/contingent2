@@ -56,7 +56,7 @@ formatted_time = now.strftime("%Y-%m-%d")
 def exporttoexcel(org):
     kurss = Guruh.objects.filter(org=org).values('kurs').distinct()
     organization_name = org.full_name
-    ws.merge_cells('A1:P2')
+    ws.merge_cells('A1:AD2')
     set_cell_properties(ws.cell(row=1, column=1),
                         f"{organization_name} talabalari kontingentining {formatted_time} holati haqida umumiy ma'lumot (o'zbek /rus)",
                         Alignment(horizontal='center', vertical='center'),
@@ -108,7 +108,6 @@ def exporttoexcel(org):
         {'row': 4, 'column': 30, 'value': 'Rus', 'width': True},
     ]
 
-
     for properties in cell_properties:
         cell = ws.cell(row=properties['row'], column=properties['column'])
         set_cell_properties(cell,
@@ -124,50 +123,1290 @@ def exporttoexcel(org):
         if 'merge' in properties:
             ws.merge_cells(properties['merge'])
 
-    # turi_choices = (
-    #     ('Kunduzgi', 'Kunduzgi'),
-    #     ('Sirtqi', 'Sirtqi'),
-    #     ('Masofaviy', 'Masofaviy'),
-    # )
-    yonalishlar = Yonalish.objects.filter(org=org)
-    row = 5
-    yonalish_kunduzgi = yonalishlar.filter(turi='Kunduzgi')
-    yonalish_sirtqi = yonalishlar.filter(turi='Sirtqi')
-    yonalish_masofaviy = yonalishlar.filter(turi='Masofaviy')
-    yonalsih_bakalavr = yonalishlar.filter(yonalishguruh__bosqich='Bakalavr')
-    yonalsih_magistr = yonalishlar.filter(yonalishguruh__bosqich='Magistratura')
-    yonalsih_doktorantura = yonalishlar.filter(yonalishguruh__bosqich='Doktorantura')
+    yonalish_kunduzgi = Yonalish.objects.filter(org=org, turi='Kunduzgi', mutahasislik_2=False).exclude(
+        yonalishguruh__bosqich='Magistr')
+    yonalish_kunduzgi = yonalish_kunduzgi.exclude(mutahasislik_2=True)
+    yonalish_sirtqi = Yonalish.objects.filter(org=org, turi='Sirtqi', mutahasislik_2=False).exclude(
+        yonalishguruh__bosqich='Magistr')
+    yonalish_masofaviy = Yonalish.objects.filter(org=org, turi='Masofaviy', mutahasislik_2=False).exclude(
+        yonalishguruh__bosqich='Magistr')
+    mut_2 = Yonalish.objects.filter(org=org, mutahasislik_2=True).exclude(
+        yonalishguruh__bosqich='Magistr', turi='Masofaviy')
+    magistir = Yonalish.objects.filter(org=org, yonalishguruh__bosqich='Magistr')
 
-#     1-talim turi misol uchun kunduzgi, sirqi,masofaviy
-#     2-jami shu yo'nalishga bo'g'langan guruhlar bo'yicha
-#     3 - jami o'zbeklar va ruslar ning soni
-#     4 - 1-kurs jami rus +o'zbek
-#     5- 1-kurs o'zbek jami
-#     6- 1-kurs rus jami
-# kunduzgi
-    for yonalish in yonalish_kunduzgi:
-        guruhlar = Guruh.objects.filter(org=org, yonalish=yonalish)
-        jami = guruhlar.count()
-        jami_o_uzbek = guruhlar.filter(yonalish__language='O\'zbek').count()
-        jami_rus = guruhlar.filter(yonalish__language='Rus').count()
-        kurslar = guruhlar.values('kurs').distinct()
-        for kurs in kurss:
-            jami_kurs = guruhlar.filter(kurs=kurs['kurs']).count()
-            jami_o_uzbek_kurs = guruhlar.filter(kurs=kurs['kurs'], yonalish__language='O\'zbek').count()
-            jami_rus_kurs = guruhlar.filter(kurs=kurs['kurs'], yonalish__language='Rus').count()
+    print(mut_2)
+    kurs_jami = 0
+
+    jami_full = 0
+    jami_uzek = 0
+    jami_rus = 0
+    kurs_1_jami = 0
+    kurs_1_uzbek_jami = 0
+    kurs_1_rus_jami = 0
+    kurs_2_jami = 0
+    kurs_2_uzbek_jami = 0
+    kurs_2_rus_jami = 0
+    kurs_3_jami = 0
+    kurs_3_uzbek_jami = 0
+    kurs_3_rus_jami = 0
+    kurs_4_jami = 0
+    kurs_4_uzbek_jami = 0
+    kurs_4_rus_jami = 0
+    kurs_5_jami = 0
+    kurs_5_uzbek_jami = 0
+    kurs_5_rus_jami = 0
+    kurs_6_jami = 0
+    kurs_6_uzbek_jami = 0
+    kurs_6_rus_jami = 0
+    kurs_7_jami = 0
+    kurs_7_uzbek_jami = 0
+    kurs_7_rus_jami = 0
+    row = 5
+    for kunduzgi_yonlaish in yonalish_kunduzgi:
+        jami = 0
+        kurs_set = Guruh.objects.filter(org=org, yonalish=kunduzgi_yonlaish).values_list('kurs', flat=True).distinct()
+        budget = Guruh.objects.filter(org=org, yonalish=kunduzgi_yonlaish).aggregate(jami=Sum('guruhbudjet__jami'))
+        shartnoma = Guruh.objects.filter(org=org, yonalish=kunduzgi_yonlaish).aggregate(
+            jami=Sum('guruhshartnoma__jami'))
+        if budget['jami']:
+            jami += budget['jami']
+            jami_full += budget['jami']
+        if shartnoma['jami']:
+            jami += shartnoma['jami']
+            jami_full += shartnoma['jami']
+        if jami != 0:
             ws.cell(row=row, column=1, value=row - 4)
-            ws.cell(row=row, column=2, value=yonalish.name)
-            ws.cell(row=row, column=3, value='Kunduzgi')
+            ws.cell(row=row, column=2, value=kunduzgi_yonlaish.name)
+            ws.cell(row=row, column=3, value=kunduzgi_yonlaish.turi)
             ws.cell(row=row, column=4, value=jami)
-            ws.cell(row=row, column=5, value=jami_o_uzbek)
-            ws.cell(row=row, column=6, value=jami_rus)
-            ws.cell(row=row, column=7, value=jami_kurs)
-            ws.cell(row=row, column=8, value=jami_o_uzbek_kurs)
-            ws.cell(row=row, column=9, value=jami_rus_kurs)
+            if kunduzgi_yonlaish.language == 'O\'zbek':
+                ws.cell(row=row, column=5, value=jami)
+                ws.cell(row=row, column=6, value=0)
+                jami_uzek += jami
+            else:
+                ws.cell(row=row, column=5, value=0)
+                ws.cell(row=row, column=6, value=jami)
+
+
+            for k in [1, 2, 3, 4, 5, 6]:  # Iterate over predefined course values
+                if k in kurs_set:
+                    jami = 0
+                    budget = Budjet.objects.filter(guruhi__org=org, guruhi__yonalish=kunduzgi_yonlaish,
+                                                   guruhi__kurs=k).aggregate(jami=Sum('jami'))
+                    shartnoma = Shartnoma.objects.filter(guruh__org=org, guruh__yonalish=kunduzgi_yonlaish,
+                                                         guruh__kurs=k).aggregate(jami=Sum('jami'))
+                    if budget['jami']:
+                        jami += budget['jami']
+                    if shartnoma['jami']:
+                        jami += shartnoma['jami']
+
+                    if k == 1 and kunduzgi_yonlaish.language == 'O\'zbek':
+
+                        ws.cell(row=row, column=7, value=jami)
+                        ws.cell(row=row, column=8, value=jami)
+                        ws.cell(row=row, column=9, value=0)
+                        kurs_1_jami += jami
+                        kurs_1_uzbek_jami += jami
+                        kurs_1_rus_jami += 0
+                    elif k == 1 and kunduzgi_yonlaish.language == 'Rus':
+
+                        ws.cell(row=row, column=7, value=jami)
+                        ws.cell(row=row, column=8, value=0)
+                        ws.cell(row=row, column=9, value=jami)
+                        kurs_1_jami += jami
+                        kurs_1_uzbek_jami += 0
+                        kurs_1_rus_jami += jami
+                    elif k == 2 and kunduzgi_yonlaish.language == 'O\'zbek':
+
+                        ws.cell(row=row, column=10, value=jami)
+                        ws.cell(row=row, column=11, value=jami)
+                        ws.cell(row=row, column=12, value=0)
+                        kurs_2_jami += jami
+                        kurs_2_uzbek_jami += jami
+                        kurs_2_rus_jami += 0
+                    elif k == 2 and kunduzgi_yonlaish.language == 'Rus':
+
+                        ws.cell(row=row, column=10, value=jami)
+                        ws.cell(row=row, column=11, value=0)
+                        ws.cell(row=row, column=12, value=jami)
+                        kurs_2_jami += jami
+                        kurs_2_uzbek_jami += 0
+                        kurs_2_rus_jami += jami
+                    elif k == 3 and kunduzgi_yonlaish.language == 'O\'zbek':
+
+                        ws.cell(row=row, column=13, value=jami)
+                        ws.cell(row=row, column=14, value=jami)
+                        ws.cell(row=row, column=15, value=0)
+                        kurs_3_jami += jami
+                        kurs_3_uzbek_jami += jami
+                        kurs_3_rus_jami += 0
+                    elif k == 3 and kunduzgi_yonlaish.language == 'Rus':
+
+                        ws.cell(row=row, column=13, value=jami)
+                        ws.cell(row=row, column=14, value=0)
+                        ws.cell(row=row, column=15, value=jami)
+                        kurs_3_jami += jami
+                        kurs_3_uzbek_jami += 0
+                        kurs_3_rus_jami += jami
+                    elif k == 4 and kunduzgi_yonlaish.language == 'O\'zbek':
+
+                        ws.cell(row=row, column=16, value=jami)
+                        ws.cell(row=row, column=17, value=jami)
+                        ws.cell(row=row, column=18, value=0)
+                        kurs_4_jami += jami
+                        kurs_4_uzbek_jami += jami
+                        kurs_4_rus_jami += 0
+                    elif k == 4 and kunduzgi_yonlaish.language == 'Rus':
+
+                        ws.cell(row=row, column=16, value=jami)
+                        ws.cell(row=row, column=17, value=0)
+                        ws.cell(row=row, column=18, value=jami)
+                        kurs_4_jami += jami
+                        kurs_4_uzbek_jami += 0
+                        kurs_4_rus_jami += jami
+                    elif k == 5 and kunduzgi_yonlaish.language == 'O\'zbek':
+
+                        ws.cell(row=row, column=19, value=jami)
+                        ws.cell(row=row, column=20, value=jami)
+                        ws.cell(row=row, column=21, value=0)
+                        kurs_5_jami += jami
+                        kurs_5_uzbek_jami += jami
+                        kurs_5_rus_jami += 0
+                    elif k == 5 and kunduzgi_yonlaish.language == 'Rus':
+
+                        ws.cell(row=row, column=19, value=jami)
+                        ws.cell(row=row, column=20, value=0)
+                        ws.cell(row=row, column=21, value=jami)
+                        kurs_5_jami += jami
+                        kurs_5_uzbek_jami += 0
+                        kurs_5_rus_jami += jami
+                    elif k == 6 and kunduzgi_yonlaish.language == 'O\'zbek':
+
+                        ws.cell(row=row, column=22, value=jami)
+                        ws.cell(row=row, column=23, value=jami)
+                        ws.cell(row=row, column=24, value=0)
+                        kurs_6_jami += jami
+                        kurs_6_uzbek_jami += jami
+                        kurs_6_rus_jami += 0
+                    elif k == 6 and kunduzgi_yonlaish.language == 'Rus':
+
+                        ws.cell(row=row, column=22, value=jami)
+                        ws.cell(row=row, column=23, value=0)
+                        ws.cell(row=row, column=24, value=jami)
+                        kurs_6_jami += jami
+                        kurs_6_uzbek_jami += 0
+                        kurs_6_rus_jami += jami
+                    else:
+                        ws.cell(row=row, column=25, value=jami)
+                        ws.cell(row=row, column=26, value=0)
+                        ws.cell(row=row, column=27, value=jami)
+
+                        kurs_6_jami += jami
+                        kurs_6_uzbek_jami += 0
+                        kurs_6_rus_jami += jami
+                else:
+                    # Handle missing course data
+                    ws.cell(row=row, column=7 + (k - 1) * 3, value=0)
+                    ws.cell(row=row, column=8 + (k - 1) * 3, value=0)
+                    ws.cell(row=row, column=9 + (k - 1) * 3, value=0)
+
             row += 1
 
-    wb.save('talabalar2.xlsx')
-# sirtqi
+            ws.cell(row=row, column=2, value='Kunduzgi Jami')
+            ws.cell(row=row, column=4, value=jami_full)
+            ws.cell(row=row, column=5, value=jami_uzek)
+            ws.cell(row=row, column=6, value=jami_rus)
+            ws.cell(row=row, column=7, value=kurs_1_jami)
+            ws.cell(row=row, column=8, value=kurs_1_uzbek_jami)
+            ws.cell(row=row, column=9, value=kurs_1_rus_jami)
+            ws.cell(row=row, column=10, value=kurs_2_jami)
+            ws.cell(row=row, column=11, value=kurs_2_uzbek_jami)
+            ws.cell(row=row, column=12, value=kurs_2_rus_jami)
+            ws.cell(row=row, column=13, value=kurs_3_jami)
+            ws.cell(row=row, column=14, value=kurs_3_uzbek_jami)
+            ws.cell(row=row, column=15, value=kurs_3_rus_jami)
+            ws.cell(row=row, column=16, value=kurs_4_jami)
+            ws.cell(row=row, column=17, value=kurs_4_uzbek_jami)
+            ws.cell(row=row, column=18, value=kurs_4_rus_jami)
+            ws.cell(row=row, column=19, value=kurs_5_jami)
+            ws.cell(row=row, column=20, value=kurs_5_uzbek_jami)
+            ws.cell(row=row, column=21, value=kurs_5_rus_jami)
+            ws.cell(row=row, column=22, value=kurs_6_jami)
+            ws.cell(row=row, column=23, value=kurs_6_uzbek_jami)
+            ws.cell(row=row, column=24, value=kurs_6_rus_jami)
+            ws.cell(row=row, column=25, value=kurs_7_jami)
+            ws.cell(row=row, column=26, value=kurs_7_uzbek_jami)
+            ws.cell(row=row, column=27, value=kurs_7_rus_jami)
+
+
+    row += 1
+    jami_full = 0
+    kurs_jami = 0
+    jami_full = 0
+    jami_uzek = 0
+    jami_rus = 0
+    kurs_1_jami = 0
+    kurs_1_uzbek_jami = 0
+    kurs_1_rus_jami = 0
+    kurs_2_jami = 0
+    kurs_2_uzbek_jami = 0
+    kurs_2_rus_jami = 0
+    kurs_3_jami = 0
+    kurs_3_uzbek_jami = 0
+    kurs_3_rus_jami = 0
+    kurs_4_jami = 0
+    kurs_4_uzbek_jami = 0
+    kurs_4_rus_jami = 0
+    kurs_5_jami = 0
+    kurs_5_uzbek_jami = 0
+    kurs_5_rus_jami = 0
+    kurs_6_jami = 0
+    kurs_6_uzbek_jami = 0
+    kurs_6_rus_jami = 0
+    kurs_7_jami = 0
+    kurs_7_uzbek_jami = 0
+    kurs_7_rus_jami = 0
+    for kunduzgi_yonlaish in yonalish_sirtqi:
+        jami = 0
+        kurs_set = Guruh.objects.filter(org=org, yonalish=kunduzgi_yonlaish).values_list('kurs', flat=True).distinct()
+        budget = Guruh.objects.filter(org=org, yonalish=kunduzgi_yonlaish).aggregate(jami=Sum('guruhbudjet__jami'))
+        shartnoma = Guruh.objects.filter(org=org, yonalish=kunduzgi_yonlaish).aggregate(
+            jami=Sum('guruhshartnoma__jami'))
+        if budget['jami']:
+            jami += budget['jami']
+            jami_full += budget['jami']
+        if shartnoma['jami']:
+            jami += shartnoma['jami']
+            jami_full += shartnoma['jami']
+        if jami != 0:
+            ws.cell(row=row, column=1, value=row - 4)
+            ws.cell(row=row, column=2, value=kunduzgi_yonlaish.name)
+            ws.cell(row=row, column=3, value=kunduzgi_yonlaish.turi)
+            ws.cell(row=row, column=4, value=jami)
+            if kunduzgi_yonlaish.language == 'O\'zbek':
+                ws.cell(row=row, column=5, value=jami)
+                ws.cell(row=row, column=6, value=0)
+                jami_uzek += jami
+            else:
+                ws.cell(row=row, column=5, value=0)
+                ws.cell(row=row, column=6, value=jami)
+                jami_rus += jami
+
+            for k in [1, 2, 3, 4, 5, 6]:  # Iterate over predefined course values
+                if k in kurs_set:
+                    jami = 0
+                    budget = Budjet.objects.filter(guruhi__org=org, guruhi__yonalish=kunduzgi_yonlaish,
+                                                   guruhi__kurs=k).aggregate(jami=Sum('jami'))
+                    shartnoma = Shartnoma.objects.filter(guruh__org=org, guruh__yonalish=kunduzgi_yonlaish,
+                                                         guruh__kurs=k).aggregate(jami=Sum('jami'))
+                    if budget['jami']:
+                        jami += budget['jami']
+                    if shartnoma['jami']:
+                        jami += shartnoma['jami']
+
+                    if k == 1 and kunduzgi_yonlaish.language == 'O\'zbek':
+
+                        ws.cell(row=row, column=7, value=jami)
+                        ws.cell(row=row, column=8, value=jami)
+                        ws.cell(row=row, column=9, value=0)
+                        kurs_1_jami += jami
+                        kurs_1_uzbek_jami += jami
+                        kurs_1_rus_jami += 0
+                    elif k == 1 and kunduzgi_yonlaish.language == 'Rus':
+
+                        ws.cell(row=row, column=7, value=jami)
+                        ws.cell(row=row, column=8, value=0)
+                        ws.cell(row=row, column=9, value=jami)
+                        kurs_1_jami += jami
+                        kurs_1_uzbek_jami += 0
+                        kurs_1_rus_jami += jami
+                    elif k == 2 and kunduzgi_yonlaish.language == 'O\'zbek':
+
+                        ws.cell(row=row, column=10, value=jami)
+                        ws.cell(row=row, column=11, value=jami)
+                        ws.cell(row=row, column=12, value=0)
+                        kurs_2_jami += jami
+                        kurs_2_uzbek_jami += jami
+                        kurs_2_rus_jami += 0
+                    elif k == 2 and kunduzgi_yonlaish.language == 'Rus':
+
+                        ws.cell(row=row, column=10, value=jami)
+                        ws.cell(row=row, column=11, value=0)
+                        ws.cell(row=row, column=12, value=jami)
+                        kurs_2_jami += jami
+                        kurs_2_uzbek_jami += 0
+                        kurs_2_rus_jami += jami
+                    elif k == 3 and kunduzgi_yonlaish.language == 'O\'zbek':
+
+                        ws.cell(row=row, column=13, value=jami)
+                        ws.cell(row=row, column=14, value=jami)
+                        ws.cell(row=row, column=15, value=0)
+                        kurs_3_jami += jami
+                        kurs_3_uzbek_jami += jami
+                        kurs_3_rus_jami += 0
+                    elif k == 3 and kunduzgi_yonlaish.language == 'Rus':
+
+                        ws.cell(row=row, column=13, value=jami)
+                        ws.cell(row=row, column=14, value=0)
+                        ws.cell(row=row, column=15, value=jami)
+                        kurs_3_jami += jami
+                        kurs_3_uzbek_jami += 0
+                        kurs_3_rus_jami += jami
+                    elif k == 4 and kunduzgi_yonlaish.language == 'O\'zbek':
+
+                        ws.cell(row=row, column=16, value=jami)
+                        ws.cell(row=row, column=17, value=jami)
+                        ws.cell(row=row, column=18, value=0)
+                        kurs_4_jami += jami
+                        kurs_4_uzbek_jami += jami
+                        kurs_4_rus_jami += 0
+                    elif k == 4 and kunduzgi_yonlaish.language == 'Rus':
+
+                        ws.cell(row=row, column=16, value=jami)
+                        ws.cell(row=row, column=17, value=0)
+                        ws.cell(row=row, column=18, value=jami)
+                        kurs_4_jami += jami
+                        kurs_4_uzbek_jami += 0
+                        kurs_4_rus_jami += jami
+                    elif k == 5 and kunduzgi_yonlaish.language == 'O\'zbek':
+
+                        ws.cell(row=row, column=19, value=jami)
+                        ws.cell(row=row, column=20, value=jami)
+                        ws.cell(row=row, column=21, value=0)
+                        kurs_5_jami += jami
+                        kurs_5_uzbek_jami += jami
+                        kurs_5_rus_jami += 0
+                    elif k == 5 and kunduzgi_yonlaish.language == 'Rus':
+
+                        ws.cell(row=row, column=19, value=jami)
+                        ws.cell(row=row, column=20, value=0)
+                        ws.cell(row=row, column=21, value=jami)
+                        kurs_5_jami += jami
+                        kurs_5_uzbek_jami += 0
+                        kurs_5_rus_jami += jami
+                    elif k == 6 and kunduzgi_yonlaish.language == 'O\'zbek':
+
+                        ws.cell(row=row, column=22, value=jami)
+                        ws.cell(row=row, column=23, value=jami)
+                        ws.cell(row=row, column=24, value=0)
+                        kurs_6_jami += jami
+                        kurs_6_uzbek_jami += jami
+                        kurs_6_rus_jami += 0
+                    elif k == 6 and kunduzgi_yonlaish.language == 'Rus':
+
+                        ws.cell(row=row, column=22, value=jami)
+                        ws.cell(row=row, column=23, value=0)
+                        ws.cell(row=row, column=24, value=jami)
+                        kurs_6_jami += jami
+                        kurs_6_uzbek_jami += 0
+                        kurs_6_rus_jami += jami
+                    else:
+                        ws.cell(row=row, column=25, value=jami)
+                        ws.cell(row=row, column=26, value=0)
+                        ws.cell(row=row, column=27, value=jami)
+                        kurs_6_jami += jami
+                        kurs_6_uzbek_jami += 0
+                        kurs_6_rus_jami += jami
+                else:
+                    # Handle missing course data
+                    ws.cell(row=row, column=7 + (k - 1) * 3, value=0)
+                    ws.cell(row=row, column=8 + (k - 1) * 3, value=0)
+                    ws.cell(row=row, column=9 + (k - 1) * 3, value=0)
+
+            row += 1
+
+            ws.cell(row=row, column=2, value='Sirtqi Jami')
+            ws.cell(row=row, column=4, value=jami_full)
+            ws.cell(row=row, column=5, value=jami_uzek)
+            ws.cell(row=row, column=6, value=jami_rus)
+            ws.cell(row=row, column=7, value=kurs_1_jami)
+            ws.cell(row=row, column=8, value=kurs_1_uzbek_jami)
+            ws.cell(row=row, column=9, value=kurs_1_rus_jami)
+            ws.cell(row=row, column=10, value=kurs_2_jami)
+            ws.cell(row=row, column=11, value=kurs_2_uzbek_jami)
+            ws.cell(row=row, column=12, value=kurs_2_rus_jami)
+            ws.cell(row=row, column=13, value=kurs_3_jami)
+            ws.cell(row=row, column=14, value=kurs_3_uzbek_jami)
+            ws.cell(row=row, column=15, value=kurs_3_rus_jami)
+            ws.cell(row=row, column=16, value=kurs_4_jami)
+            ws.cell(row=row, column=17, value=kurs_4_uzbek_jami)
+            ws.cell(row=row, column=18, value=kurs_4_rus_jami)
+            ws.cell(row=row, column=19, value=kurs_5_jami)
+            ws.cell(row=row, column=20, value=kurs_5_uzbek_jami)
+            ws.cell(row=row, column=21, value=kurs_5_rus_jami)
+            ws.cell(row=row, column=22, value=kurs_6_jami)
+            ws.cell(row=row, column=23, value=kurs_6_uzbek_jami)
+            ws.cell(row=row, column=24, value=kurs_6_rus_jami)
+            ws.cell(row=row, column=25, value=kurs_7_jami)
+            ws.cell(row=row, column=26, value=kurs_7_uzbek_jami)
+            ws.cell(row=row, column=27, value=kurs_7_rus_jami)
+    row += 1
+    jami_full = 0
+    kurs_jami = 0
+    jami_full = 0
+    jami_uzek = 0
+    jami_rus = 0
+    kurs_1_jami = 0
+    kurs_1_uzbek_jami = 0
+    kurs_1_rus_jami = 0
+    kurs_2_jami = 0
+    kurs_2_uzbek_jami = 0
+    kurs_2_rus_jami = 0
+    kurs_3_jami = 0
+    kurs_3_uzbek_jami = 0
+    kurs_3_rus_jami = 0
+    kurs_4_jami = 0
+    kurs_4_uzbek_jami = 0
+    kurs_4_rus_jami = 0
+    kurs_5_jami = 0
+    kurs_5_uzbek_jami = 0
+    kurs_5_rus_jami = 0
+    kurs_6_jami = 0
+    kurs_6_uzbek_jami = 0
+    kurs_6_rus_jami = 0
+    kurs_7_jami = 0
+    kurs_7_uzbek_jami = 0
+    kurs_7_rus_jami = 0
+    for kunduzgi_yonlaish in yonalish_masofaviy:
+        jami = 0
+        kurs_set = Guruh.objects.filter(org=org, yonalish=kunduzgi_yonlaish).values_list('kurs', flat=True).distinct()
+        budget = Guruh.objects.filter(org=org, yonalish=kunduzgi_yonlaish).aggregate(jami=Sum('guruhbudjet__jami'))
+        shartnoma = Guruh.objects.filter(org=org, yonalish=kunduzgi_yonlaish).aggregate(
+            jami=Sum('guruhshartnoma__jami'))
+        if budget['jami']:
+            jami += budget['jami']
+            jami_full += budget['jami']
+        if shartnoma['jami']:
+            jami += shartnoma['jami']
+            jami_full += shartnoma['jami']
+        if jami != 0:
+            ws.cell(row=row, column=1, value=row - 4)
+            ws.cell(row=row, column=2, value=kunduzgi_yonlaish.name)
+            ws.cell(row=row, column=3, value=kunduzgi_yonlaish.turi)
+            ws.cell(row=row, column=4, value=jami)
+            if kunduzgi_yonlaish.language == 'O\'zbek':
+                ws.cell(row=row, column=5, value=jami)
+                ws.cell(row=row, column=6, value=0)
+                jami_uzek += jami
+            else:
+                ws.cell(row=row, column=5, value=0)
+                ws.cell(row=row, column=6, value=jami)
+
+
+            for k in [1, 2, 3, 4, 5, 6]:  # Iterate over predefined course values
+                if k in kurs_set:
+                    jami = 0
+                    budget = Budjet.objects.filter(guruhi__org=org, guruhi__yonalish=kunduzgi_yonlaish,
+                                                   guruhi__kurs=k).aggregate(jami=Sum('jami'))
+                    shartnoma = Shartnoma.objects.filter(guruh__org=org, guruh__yonalish=kunduzgi_yonlaish,
+                                                         guruh__kurs=k).aggregate(jami=Sum('jami'))
+                    if budget['jami']:
+                        jami += budget['jami']
+                    if shartnoma['jami']:
+                        jami += shartnoma['jami']
+
+                    if k == 1 and kunduzgi_yonlaish.language == 'O\'zbek':
+
+                        ws.cell(row=row, column=7, value=jami)
+                        ws.cell(row=row, column=8, value=jami)
+                        ws.cell(row=row, column=9, value=0)
+                        kurs_1_jami += jami
+                        kurs_1_uzbek_jami += jami
+                        kurs_1_rus_jami += 0
+                    elif k == 1 and kunduzgi_yonlaish.language == 'Rus':
+
+                        ws.cell(row=row, column=7, value=jami)
+                        ws.cell(row=row, column=8, value=0)
+                        ws.cell(row=row, column=9, value=jami)
+                        kurs_1_jami += jami
+                        kurs_1_uzbek_jami += 0
+                        kurs_1_rus_jami += jami
+                    elif k == 2 and kunduzgi_yonlaish.language == 'O\'zbek':
+
+                        ws.cell(row=row, column=10, value=jami)
+                        ws.cell(row=row, column=11, value=jami)
+                        ws.cell(row=row, column=12, value=0)
+                        kurs_2_jami += jami
+                        kurs_2_uzbek_jami += jami
+                        kurs_2_rus_jami += 0
+                    elif k == 2 and kunduzgi_yonlaish.language == 'Rus':
+
+                        ws.cell(row=row, column=10, value=jami)
+                        ws.cell(row=row, column=11, value=0)
+                        ws.cell(row=row, column=12, value=jami)
+                        kurs_2_jami += jami
+                        kurs_2_uzbek_jami += 0
+                        kurs_2_rus_jami += jami
+                    elif k == 3 and kunduzgi_yonlaish.language == 'O\'zbek':
+
+                        ws.cell(row=row, column=13, value=jami)
+                        ws.cell(row=row, column=14, value=jami)
+                        ws.cell(row=row, column=15, value=0)
+                        kurs_3_jami += jami
+                        kurs_3_uzbek_jami += jami
+                        kurs_3_rus_jami += 0
+                    elif k == 3 and kunduzgi_yonlaish.language == 'Rus':
+
+                        ws.cell(row=row, column=13, value=jami)
+                        ws.cell(row=row, column=14, value=0)
+                        ws.cell(row=row, column=15, value=jami)
+                        kurs_3_jami += jami
+                        kurs_3_uzbek_jami += 0
+                        kurs_3_rus_jami += jami
+                    elif k == 4 and kunduzgi_yonlaish.language == 'O\'zbek':
+
+                        ws.cell(row=row, column=16, value=jami)
+                        ws.cell(row=row, column=17, value=jami)
+                        ws.cell(row=row, column=18, value=0)
+                        kurs_4_jami += jami
+                        kurs_4_uzbek_jami += jami
+                        kurs_4_rus_jami += 0
+                    elif k == 4 and kunduzgi_yonlaish.language == 'Rus':
+
+                        ws.cell(row=row, column=16, value=jami)
+                        ws.cell(row=row, column=17, value=0)
+                        ws.cell(row=row, column=18, value=jami)
+                        kurs_4_jami += jami
+                        kurs_4_uzbek_jami += 0
+                        kurs_4_rus_jami += jami
+                    elif k == 5 and kunduzgi_yonlaish.language == 'O\'zbek':
+
+                        ws.cell(row=row, column=19, value=jami)
+                        ws.cell(row=row, column=20, value=jami)
+                        ws.cell(row=row, column=21, value=0)
+                        kurs_5_jami += jami
+                        kurs_5_uzbek_jami += jami
+                        kurs_5_rus_jami += 0
+                    elif k == 5 and kunduzgi_yonlaish.language == 'Rus':
+
+                        ws.cell(row=row, column=19, value=jami)
+                        ws.cell(row=row, column=20, value=0)
+                        ws.cell(row=row, column=21, value=jami)
+                        kurs_5_jami += jami
+                        kurs_5_uzbek_jami += 0
+                        kurs_5_rus_jami += jami
+                    elif k == 6 and kunduzgi_yonlaish.language == 'O\'zbek':
+
+                        ws.cell(row=row, column=22, value=jami)
+                        ws.cell(row=row, column=23, value=jami)
+                        ws.cell(row=row, column=24, value=0)
+                        kurs_6_jami += jami
+                        kurs_6_uzbek_jami += jami
+                        kurs_6_rus_jami += 0
+                    elif k == 6 and kunduzgi_yonlaish.language == 'Rus':
+
+                        ws.cell(row=row, column=22, value=jami)
+                        ws.cell(row=row, column=23, value=0)
+                        ws.cell(row=row, column=24, value=jami)
+                        kurs_6_jami += jami
+                        kurs_6_uzbek_jami += 0
+                        kurs_6_rus_jami += jami
+                    else:
+                        ws.cell(row=row, column=25, value=jami)
+                        ws.cell(row=row, column=26, value=0)
+                        ws.cell(row=row, column=27, value=jami)
+
+                        kurs_6_jami += jami
+                        kurs_6_uzbek_jami += 0
+                        kurs_6_rus_jami += jami
+                else:
+                    # Handle missing course data
+                    ws.cell(row=row, column=7 + (k - 1) * 3, value=0)
+                    ws.cell(row=row, column=8 + (k - 1) * 3, value=0)
+                    ws.cell(row=row, column=9 + (k - 1) * 3, value=0)
+
+            row += 1
+
+            ws.cell(row=row, column=2, value='Masofaviy jami')
+            ws.cell(row=row, column=4, value=jami_full)
+            ws.cell(row=row, column=5, value=jami_uzek)
+            ws.cell(row=row, column=6, value=jami_rus)
+            ws.cell(row=row, column=7, value=kurs_1_jami)
+            ws.cell(row=row, column=8, value=kurs_1_uzbek_jami)
+            ws.cell(row=row, column=9, value=kurs_1_rus_jami)
+            ws.cell(row=row, column=10, value=kurs_2_jami)
+            ws.cell(row=row, column=11, value=kurs_2_uzbek_jami)
+            ws.cell(row=row, column=12, value=kurs_2_rus_jami)
+            ws.cell(row=row, column=13, value=kurs_3_jami)
+            ws.cell(row=row, column=14, value=kurs_3_uzbek_jami)
+            ws.cell(row=row, column=15, value=kurs_3_rus_jami)
+            ws.cell(row=row, column=16, value=kurs_4_jami)
+            ws.cell(row=row, column=17, value=kurs_4_uzbek_jami)
+            ws.cell(row=row, column=18, value=kurs_4_rus_jami)
+            ws.cell(row=row, column=19, value=kurs_5_jami)
+            ws.cell(row=row, column=20, value=kurs_5_uzbek_jami)
+            ws.cell(row=row, column=21, value=kurs_5_rus_jami)
+            ws.cell(row=row, column=22, value=kurs_6_jami)
+            ws.cell(row=row, column=23, value=kurs_6_uzbek_jami)
+            ws.cell(row=row, column=24, value=kurs_6_rus_jami)
+            ws.cell(row=row, column=25, value=kurs_7_jami)
+            ws.cell(row=row, column=26, value=kurs_7_uzbek_jami)
+            ws.cell(row=row, column=27, value=kurs_7_rus_jami)
+    row += 1
+    jami_full = 0
+    kurs_jami = 0
+    jami_full = 0
+    jami_uzek = 0
+    jami_rus = 0
+    kurs_1_jami = 0
+    kurs_1_uzbek_jami = 0
+    kurs_1_rus_jami = 0
+    kurs_2_jami = 0
+    kurs_2_uzbek_jami = 0
+    kurs_2_rus_jami = 0
+    kurs_3_jami = 0
+    kurs_3_uzbek_jami = 0
+    kurs_3_rus_jami = 0
+    kurs_4_jami = 0
+    kurs_4_uzbek_jami = 0
+    kurs_4_rus_jami = 0
+    kurs_5_jami = 0
+    kurs_5_uzbek_jami = 0
+    kurs_5_rus_jami = 0
+    kurs_6_jami = 0
+    kurs_6_uzbek_jami = 0
+    kurs_6_rus_jami = 0
+    kurs_7_jami = 0
+    kurs_7_uzbek_jami = 0
+    kurs_7_rus_jami = 0
+    for kunduzgi_yonlaish in mut_2:
+        jami = 0
+        kurs_set = Guruh.objects.filter(org=org, yonalish=kunduzgi_yonlaish).values_list('kurs', flat=True).distinct()
+        budget = Guruh.objects.filter(org=org, yonalish=kunduzgi_yonlaish).aggregate(jami=Sum('guruhbudjet__jami'))
+        shartnoma = Guruh.objects.filter(org=org, yonalish=kunduzgi_yonlaish).aggregate(
+            jami=Sum('guruhshartnoma__jami'))
+        if budget['jami']:
+            jami += budget['jami']
+            jami_full += budget['jami']
+        if shartnoma['jami']:
+            jami += shartnoma['jami']
+            jami_full += shartnoma['jami']
+        if jami != 0:
+            ws.cell(row=row, column=1, value=row - 4)
+            ws.cell(row=row, column=2, value=kunduzgi_yonlaish.name)
+            ws.cell(row=row, column=3, value=kunduzgi_yonlaish.turi)
+            ws.cell(row=row, column=4, value=jami)
+            if kunduzgi_yonlaish.language == 'O\'zbek':
+                ws.cell(row=row, column=5, value=jami)
+                ws.cell(row=row, column=6, value=0)
+                jami_uzek += jami
+            else:
+                ws.cell(row=row, column=5, value=0)
+                ws.cell(row=row, column=6, value=jami)
+
+            for k in [1, 2, 3, 4, 5, 6]:  # Iterate over predefined course values
+                if k in kurs_set:
+                    jami = 0
+                    budget = Budjet.objects.filter(guruhi__org=org, guruhi__yonalish=kunduzgi_yonlaish,
+                                                   guruhi__kurs=k).aggregate(jami=Sum('jami'))
+                    shartnoma = Shartnoma.objects.filter(guruh__org=org, guruh__yonalish=kunduzgi_yonlaish,
+                                                         guruh__kurs=k).aggregate(jami=Sum('jami'))
+                    if budget['jami']:
+                        jami += budget['jami']
+                    if shartnoma['jami']:
+                        jami += shartnoma['jami']
+
+                    if k == 1 and kunduzgi_yonlaish.language == 'O\'zbek':
+
+                        ws.cell(row=row, column=7, value=jami)
+                        ws.cell(row=row, column=8, value=jami)
+                        ws.cell(row=row, column=9, value=0)
+                        kurs_1_jami += jami
+                        kurs_1_uzbek_jami += jami
+                        kurs_1_rus_jami += 0
+                    elif k == 1 and kunduzgi_yonlaish.language == 'Rus':
+
+                        ws.cell(row=row, column=7, value=jami)
+                        ws.cell(row=row, column=8, value=0)
+                        ws.cell(row=row, column=9, value=jami)
+                        kurs_1_jami += jami
+                        kurs_1_uzbek_jami += 0
+                        kurs_1_rus_jami += jami
+                    elif k == 2 and kunduzgi_yonlaish.language == 'O\'zbek':
+
+                        ws.cell(row=row, column=10, value=jami)
+                        ws.cell(row=row, column=11, value=jami)
+                        ws.cell(row=row, column=12, value=0)
+                        kurs_2_jami += jami
+                        kurs_2_uzbek_jami += jami
+                        kurs_2_rus_jami += 0
+                    elif k == 2 and kunduzgi_yonlaish.language == 'Rus':
+
+                        ws.cell(row=row, column=10, value=jami)
+                        ws.cell(row=row, column=11, value=0)
+                        ws.cell(row=row, column=12, value=jami)
+                        kurs_2_jami += jami
+                        kurs_2_uzbek_jami += 0
+                        kurs_2_rus_jami += jami
+                    elif k == 3 and kunduzgi_yonlaish.language == 'O\'zbek':
+
+                        ws.cell(row=row, column=13, value=jami)
+                        ws.cell(row=row, column=14, value=jami)
+                        ws.cell(row=row, column=15, value=0)
+                        kurs_3_jami += jami
+                        kurs_3_uzbek_jami += jami
+                        kurs_3_rus_jami += 0
+                    elif k == 3 and kunduzgi_yonlaish.language == 'Rus':
+
+                        ws.cell(row=row, column=13, value=jami)
+                        ws.cell(row=row, column=14, value=0)
+                        ws.cell(row=row, column=15, value=jami)
+                        kurs_3_jami += jami
+                        kurs_3_uzbek_jami += 0
+                        kurs_3_rus_jami += jami
+                    elif k == 4 and kunduzgi_yonlaish.language == 'O\'zbek':
+
+                        ws.cell(row=row, column=16, value=jami)
+                        ws.cell(row=row, column=17, value=jami)
+                        ws.cell(row=row, column=18, value=0)
+                        kurs_4_jami += jami
+                        kurs_4_uzbek_jami += jami
+                        kurs_4_rus_jami += 0
+                    elif k == 4 and kunduzgi_yonlaish.language == 'Rus':
+
+                        ws.cell(row=row, column=16, value=jami)
+                        ws.cell(row=row, column=17, value=0)
+                        ws.cell(row=row, column=18, value=jami)
+                        kurs_4_jami += jami
+                        kurs_4_uzbek_jami += 0
+                        kurs_4_rus_jami += jami
+                    elif k == 5 and kunduzgi_yonlaish.language == 'O\'zbek':
+
+                        ws.cell(row=row, column=19, value=jami)
+                        ws.cell(row=row, column=20, value=jami)
+                        ws.cell(row=row, column=21, value=0)
+                        kurs_5_jami += jami
+                        kurs_5_uzbek_jami += jami
+                        kurs_5_rus_jami += 0
+                    elif k == 5 and kunduzgi_yonlaish.language == 'Rus':
+
+                        ws.cell(row=row, column=19, value=jami)
+                        ws.cell(row=row, column=20, value=0)
+                        ws.cell(row=row, column=21, value=jami)
+                        kurs_5_jami += jami
+                        kurs_5_uzbek_jami += 0
+                        kurs_5_rus_jami += jami
+                    elif k == 6 and kunduzgi_yonlaish.language == 'O\'zbek':
+
+                        ws.cell(row=row, column=22, value=jami)
+                        ws.cell(row=row, column=23, value=jami)
+                        ws.cell(row=row, column=24, value=0)
+                        kurs_6_jami += jami
+                        kurs_6_uzbek_jami += jami
+                        kurs_6_rus_jami += 0
+                    elif k == 6 and kunduzgi_yonlaish.language == 'Rus':
+
+                        ws.cell(row=row, column=22, value=jami)
+                        ws.cell(row=row, column=23, value=0)
+                        ws.cell(row=row, column=24, value=jami)
+                        kurs_6_jami += jami
+                        kurs_6_uzbek_jami += 0
+                        kurs_6_rus_jami += jami
+                    else:
+                        ws.cell(row=row, column=25, value=jami)
+                        ws.cell(row=row, column=26, value=0)
+                        ws.cell(row=row, column=27, value=jami)
+
+                        kurs_6_jami += jami
+                        kurs_6_uzbek_jami += 0
+                        kurs_6_rus_jami += jami
+                else:
+                    # Handle missing course data
+                    ws.cell(row=row, column=7 + (k - 1) * 3, value=0)
+                    ws.cell(row=row, column=8 + (k - 1) * 3, value=0)
+                    ws.cell(row=row, column=9 + (k - 1) * 3, value=0)
+
+            row += 1
+
+            ws.cell(row=row, column=2, value='Masofaviy jami')
+            ws.cell(row=row, column=4, value=jami_full)
+            ws.cell(row=row, column=5, value=jami_uzek)
+            ws.cell(row=row, column=6, value=jami_rus)
+            ws.cell(row=row, column=7, value=kurs_1_jami)
+            ws.cell(row=row, column=8, value=kurs_1_uzbek_jami)
+            ws.cell(row=row, column=9, value=kurs_1_rus_jami)
+            ws.cell(row=row, column=10, value=kurs_2_jami)
+            ws.cell(row=row, column=11, value=kurs_2_uzbek_jami)
+            ws.cell(row=row, column=12, value=kurs_2_rus_jami)
+            ws.cell(row=row, column=13, value=kurs_3_jami)
+            ws.cell(row=row, column=14, value=kurs_3_uzbek_jami)
+            ws.cell(row=row, column=15, value=kurs_3_rus_jami)
+            ws.cell(row=row, column=16, value=kurs_4_jami)
+            ws.cell(row=row, column=17, value=kurs_4_uzbek_jami)
+            ws.cell(row=row, column=18, value=kurs_4_rus_jami)
+            ws.cell(row=row, column=19, value=kurs_5_jami)
+            ws.cell(row=row, column=20, value=kurs_5_uzbek_jami)
+            ws.cell(row=row, column=21, value=kurs_5_rus_jami)
+            ws.cell(row=row, column=22, value=kurs_6_jami)
+            ws.cell(row=row, column=23, value=kurs_6_uzbek_jami)
+            ws.cell(row=row, column=24, value=kurs_6_rus_jami)
+            ws.cell(row=row, column=25, value=kurs_7_jami)
+            ws.cell(row=row, column=26, value=kurs_7_uzbek_jami)
+            ws.cell(row=row, column=27, value=kurs_7_rus_jami)
+    row += 1
+    jami_full = 0
+    kurs_jami = 0
+    jami_full = 0
+    jami_uzek = 0
+    jami_rus = 0
+    kurs_1_jami = 0
+    kurs_1_uzbek_jami = 0
+    kurs_1_rus_jami = 0
+    kurs_2_jami = 0
+    kurs_2_uzbek_jami = 0
+    kurs_2_rus_jami = 0
+    kurs_3_jami = 0
+    kurs_3_uzbek_jami = 0
+    kurs_3_rus_jami = 0
+    kurs_4_jami = 0
+    kurs_4_uzbek_jami = 0
+    kurs_4_rus_jami = 0
+    kurs_5_jami = 0
+    kurs_5_uzbek_jami = 0
+    kurs_5_rus_jami = 0
+    kurs_6_jami = 0
+    kurs_6_uzbek_jami = 0
+    kurs_6_rus_jami = 0
+    kurs_7_jami = 0
+    kurs_7_uzbek_jami = 0
+    kurs_7_rus_jami = 0
+    for kunduzgi_yonlaish in magistir:
+        jami = 0
+        kurs_set = Guruh.objects.filter(org=org, yonalish=kunduzgi_yonlaish).values_list('kurs', flat=True).distinct()
+        budget = Guruh.objects.filter(org=org, yonalish=kunduzgi_yonlaish).aggregate(jami=Sum('guruhbudjet__jami'))
+        shartnoma = Guruh.objects.filter(org=org, yonalish=kunduzgi_yonlaish).aggregate(
+            jami=Sum('guruhshartnoma__jami'))
+        if budget['jami']:
+            jami += budget['jami']
+            jami_full += budget['jami']
+        if shartnoma['jami']:
+            jami += shartnoma['jami']
+            jami_full += shartnoma['jami']
+        if jami != 0:
+            ws.cell(row=row, column=1, value=row - 4)
+            ws.cell(row=row, column=2, value=kunduzgi_yonlaish.name)
+            ws.cell(row=row, column=3, value=kunduzgi_yonlaish.turi)
+            ws.cell(row=row, column=4, value=jami)
+            if kunduzgi_yonlaish.language == 'O\'zbek':
+                ws.cell(row=row, column=5, value=jami)
+                ws.cell(row=row, column=6, value=0)
+                jami_uzek += jami
+            else:
+                ws.cell(row=row, column=5, value=0)
+                ws.cell(row=row, column=6, value=jami)
+
+            for k in [1, 2, 3, 4, 5, 6]:  # Iterate over predefined course values
+                if k in kurs_set:
+                    jami = 0
+                    budget = Budjet.objects.filter(guruhi__org=org, guruhi__yonalish=kunduzgi_yonlaish,
+                                                   guruhi__kurs=k).aggregate(jami=Sum('jami'))
+                    shartnoma = Shartnoma.objects.filter(guruh__org=org, guruh__yonalish=kunduzgi_yonlaish,
+                                                         guruh__kurs=k).aggregate(jami=Sum('jami'))
+                    if budget['jami']:
+                        jami += budget['jami']
+                    if shartnoma['jami']:
+                        jami += shartnoma['jami']
+
+                    if k == 1 and kunduzgi_yonlaish.language == 'O\'zbek':
+
+                        ws.cell(row=row, column=7, value=jami)
+                        ws.cell(row=row, column=8, value=jami)
+                        ws.cell(row=row, column=9, value=0)
+                        kurs_1_jami += jami
+                        kurs_1_uzbek_jami += jami
+                        kurs_1_rus_jami += 0
+                    elif k == 1 and kunduzgi_yonlaish.language == 'Rus':
+
+                        ws.cell(row=row, column=7, value=jami)
+                        ws.cell(row=row, column=8, value=0)
+                        ws.cell(row=row, column=9, value=jami)
+                        kurs_1_jami += jami
+                        kurs_1_uzbek_jami += 0
+                        kurs_1_rus_jami += jami
+                    elif k == 2 and kunduzgi_yonlaish.language == 'O\'zbek':
+
+                        ws.cell(row=row, column=10, value=jami)
+                        ws.cell(row=row, column=11, value=jami)
+                        ws.cell(row=row, column=12, value=0)
+                        kurs_2_jami += jami
+                        kurs_2_uzbek_jami += jami
+                        kurs_2_rus_jami += 0
+                    elif k == 2 and kunduzgi_yonlaish.language == 'Rus':
+
+                        ws.cell(row=row, column=10, value=jami)
+                        ws.cell(row=row, column=11, value=0)
+                        ws.cell(row=row, column=12, value=jami)
+                        kurs_2_jami += jami
+                        kurs_2_uzbek_jami += 0
+                        kurs_2_rus_jami += jami
+                    elif k == 3 and kunduzgi_yonlaish.language == 'O\'zbek':
+
+                        ws.cell(row=row, column=13, value=jami)
+                        ws.cell(row=row, column=14, value=jami)
+                        ws.cell(row=row, column=15, value=0)
+                        kurs_3_jami += jami
+                        kurs_3_uzbek_jami += jami
+                        kurs_3_rus_jami += 0
+                    elif k == 3 and kunduzgi_yonlaish.language == 'Rus':
+
+                        ws.cell(row=row, column=13, value=jami)
+                        ws.cell(row=row, column=14, value=0)
+                        ws.cell(row=row, column=15, value=jami)
+                        kurs_3_jami += jami
+                        kurs_3_uzbek_jami += 0
+                        kurs_3_rus_jami += jami
+                    elif k == 4 and kunduzgi_yonlaish.language == 'O\'zbek':
+
+                        ws.cell(row=row, column=16, value=jami)
+                        ws.cell(row=row, column=17, value=jami)
+                        ws.cell(row=row, column=18, value=0)
+                        kurs_4_jami += jami
+                        kurs_4_uzbek_jami += jami
+                        kurs_4_rus_jami += 0
+                    elif k == 4 and kunduzgi_yonlaish.language == 'Rus':
+
+                        ws.cell(row=row, column=16, value=jami)
+                        ws.cell(row=row, column=17, value=0)
+                        ws.cell(row=row, column=18, value=jami)
+                        kurs_4_jami += jami
+                        kurs_4_uzbek_jami += 0
+                        kurs_4_rus_jami += jami
+                    elif k == 5 and kunduzgi_yonlaish.language == 'O\'zbek':
+
+                        ws.cell(row=row, column=19, value=jami)
+                        ws.cell(row=row, column=20, value=jami)
+                        ws.cell(row=row, column=21, value=0)
+                        kurs_5_jami += jami
+                        kurs_5_uzbek_jami += jami
+                        kurs_5_rus_jami += 0
+                    elif k == 5 and kunduzgi_yonlaish.language == 'Rus':
+
+                        ws.cell(row=row, column=19, value=jami)
+                        ws.cell(row=row, column=20, value=0)
+                        ws.cell(row=row, column=21, value=jami)
+                        kurs_5_jami += jami
+                        kurs_5_uzbek_jami += 0
+                        kurs_5_rus_jami += jami
+                    elif k == 6 and kunduzgi_yonlaish.language == 'O\'zbek':
+
+                        ws.cell(row=row, column=22, value=jami)
+                        ws.cell(row=row, column=23, value=jami)
+                        ws.cell(row=row, column=24, value=0)
+                        kurs_6_jami += jami
+                        kurs_6_uzbek_jami += jami
+                        kurs_6_rus_jami += 0
+                    elif k == 6 and kunduzgi_yonlaish.language == 'Rus':
+
+                        ws.cell(row=row, column=22, value=jami)
+                        ws.cell(row=row, column=23, value=0)
+                        ws.cell(row=row, column=24, value=jami)
+                        kurs_6_jami += jami
+                        kurs_6_uzbek_jami += 0
+                        kurs_6_rus_jami += jami
+                    else:
+                        ws.cell(row=row, column=25, value=jami)
+                        ws.cell(row=row, column=26, value=0)
+                        ws.cell(row=row, column=27, value=jami)
+
+                        kurs_6_jami += jami
+                        kurs_6_uzbek_jami += 0
+                        kurs_6_rus_jami += jami
+                else:
+                    # Handle missing course data
+                    ws.cell(row=row, column=7 + (k - 1) * 3, value=0)
+                    ws.cell(row=row, column=8 + (k - 1) * 3, value=0)
+                    ws.cell(row=row, column=9 + (k - 1) * 3, value=0)
+
+            row += 1
+
+            ws.cell(row=row, column=2, value='Magistir jami')
+            ws.cell(row=row, column=4, value=jami_full)
+            ws.cell(row=row, column=5, value=jami_uzek)
+            ws.cell(row=row, column=6, value=jami_rus)
+            ws.cell(row=row, column=7, value=kurs_1_jami)
+            ws.cell(row=row, column=8, value=kurs_1_uzbek_jami)
+            ws.cell(row=row, column=9, value=kurs_1_rus_jami)
+            ws.cell(row=row, column=10, value=kurs_2_jami)
+            ws.cell(row=row, column=11, value=kurs_2_uzbek_jami)
+            ws.cell(row=row, column=12, value=kurs_2_rus_jami)
+            ws.cell(row=row, column=13, value=kurs_3_jami)
+            ws.cell(row=row, column=14, value=kurs_3_uzbek_jami)
+            ws.cell(row=row, column=15, value=kurs_3_rus_jami)
+            ws.cell(row=row, column=16, value=kurs_4_jami)
+            ws.cell(row=row, column=17, value=kurs_4_uzbek_jami)
+            ws.cell(row=row, column=18, value=kurs_4_rus_jami)
+            ws.cell(row=row, column=19, value=kurs_5_jami)
+            ws.cell(row=row, column=20, value=kurs_5_uzbek_jami)
+            ws.cell(row=row, column=21, value=kurs_5_rus_jami)
+            ws.cell(row=row, column=22, value=kurs_6_jami)
+            ws.cell(row=row, column=23, value=kurs_6_uzbek_jami)
+            ws.cell(row=row, column=24, value=kurs_6_rus_jami)
+            ws.cell(row=row, column=25, value=kurs_7_jami)
+            ws.cell(row=row, column=26, value=kurs_7_uzbek_jami)
+            ws.cell(row=row, column=27, value=kurs_7_rus_jami)
+    row += 1
+    # bakalvr bo'gan guruhlar jamini hisoblash
+    jami_full = 0
+    kurs_jami = 0
+    jami_full = 0
+    jami_uzek = 0
+    jami_rus = 0
+    kurs_1_jami = 0
+    kurs_1_uzbek_jami = 0
+    kurs_1_rus_jami = 0
+    kurs_2_jami = 0
+    kurs_2_uzbek_jami = 0
+    kurs_2_rus_jami = 0
+    kurs_3_jami = 0
+    kurs_3_uzbek_jami = 0
+    kurs_3_rus_jami = 0
+    kurs_4_jami = 0
+    kurs_4_uzbek_jami = 0
+    kurs_4_rus_jami = 0
+    kurs_5_jami = 0
+    kurs_5_uzbek_jami = 0
+    kurs_5_rus_jami = 0
+    kurs_6_jami = 0
+    kurs_6_uzbek_jami = 0
+    kurs_6_rus_jami = 0
+    kurs_7_jami = 0
+    kurs_7_uzbek_jami = 0
+    kurs_7_rus_jami = 0
+    result = {}
+    guruhs = Guruh.objects.filter(org=org, bosqich='Bakalavr')
+    for guruh in guruhs:
+        language = guruh.yonalish.language
+        course = guruh.kurs
+        jami = 0
+        budget = Budjet.objects.filter(guruhi=guruh).aggregate(jami=Sum('jami'))
+        shartnoma = Shartnoma.objects.filter(guruh=guruh).aggregate(jami=Sum('jami'))
+        if budget['jami']:
+            jami += budget['jami']
+            jami_full += budget['jami']
+        if shartnoma['jami']:
+            jami += shartnoma['jami']
+            jami_full += shartnoma['jami']
+    for k in [1, 2, 3, 4, 5, 6]:
+        guruhs = Guruh.objects.filter(org=org, bosqich='Bakalavr', kurs=k)
+        for guruh in guruhs:
+            language = guruh.yonalish.language
+            course = guruh.kurs
+            jami = 0
+            budget = Budjet.objects.filter(guruhi=guruh).aggregate(jami=Sum('jami'))
+            shartnoma = Shartnoma.objects.filter(guruh=guruh).aggregate(jami=Sum('jami'))
+            if budget['jami']:
+                jami += budget['jami']
+            if shartnoma['jami']:
+                jami += shartnoma['jami']
+            if language == 'O\'zbek':
+                jami_uzek += jami
+            else:
+                jami_rus += jami
+            if k == 1:
+                if language == 'O\'zbek':
+                    kurs_1_uzbek_jami += jami
+                else:
+                    kurs_1_rus_jami += jami
+                kurs_1_jami += jami
+            elif k == 2:
+                if language == 'O\'zbek':
+                    kurs_2_uzbek_jami += jami
+                else:
+                    kurs_2_rus_jami += jami
+                kurs_2_jami += jami
+            elif k == 3:
+                if language == 'O\'zbek':
+                    kurs_3_uzbek_jami += jami
+                else:
+                    kurs_3_rus_jami += jami
+                kurs_3_jami += jami
+            elif k == 4:
+                if language == 'O\'zbek':
+                    kurs_4_uzbek_jami += jami
+                else:
+                    kurs_4_rus_jami += jami
+                kurs_4_jami += jami
+            elif k == 5:
+                if language == 'O\'zbek':
+                    kurs_5_uzbek_jami += jami
+                else:
+                    kurs_5_rus_jami += jami
+                kurs_5_jami += jami
+            elif k == 6:
+                if language == 'O\'zbek':
+                    kurs_6_uzbek_jami += jami
+                else:
+                    kurs_6_rus_jami += jami
+                kurs_6_jami += jami
+            else:
+                if language == 'O\'zbek':
+                    kurs_7_uzbek_jami+=jami
+
+                else:
+                    kurs_7_rus_jami+=jami
+                kurs_7_jami += jami
+    row += 1
+    ws.cell(row=row, column=2, value='Bakalavr full')
+    ws.cell(row=row, column=4, value=jami_full)
+    ws.cell(row=row, column=5, value=jami_uzek)
+    ws.cell(row=row, column=6, value=jami_rus)
+    ws.cell(row=row, column=7, value=kurs_1_jami)
+    ws.cell(row=row, column=8, value=kurs_1_uzbek_jami)
+    ws.cell(row=row, column=9, value=kurs_1_rus_jami)
+    ws.cell(row=row, column=10, value=kurs_2_jami)
+    ws.cell(row=row, column=11, value=kurs_2_uzbek_jami)
+    ws.cell(row=row, column=12, value=kurs_2_rus_jami)
+    ws.cell(row=row, column=13, value=kurs_3_jami)
+    ws.cell(row=row, column=14, value=kurs_3_uzbek_jami)
+    ws.cell(row=row, column=15, value=kurs_3_rus_jami)
+    ws.cell(row=row, column=16, value=kurs_4_jami)
+    ws.cell(row=row, column=17, value=kurs_4_uzbek_jami)
+    ws.cell(row=row, column=18, value=kurs_4_rus_jami)
+    ws.cell(row=row, column=19, value=kurs_5_jami)
+    ws.cell(row=row, column=20, value=kurs_5_uzbek_jami)
+    ws.cell(row=row, column=21, value=kurs_5_rus_jami)
+    ws.cell(row=row, column=22, value=kurs_6_jami)
+    ws.cell(row=row, column=23, value=kurs_6_uzbek_jami)
+    ws.cell(row=row, column=24, value=kurs_6_rus_jami)
+    ws.cell(row=row, column=25, value=kurs_7_jami)
+    ws.cell(row=row, column=26, value=kurs_7_uzbek_jami)
+    ws.cell(row=row, column=27, value=kurs_7_rus_jami)
+    row+=1
+    jami_full = 0
+    kurs_jami = 0
+    jami_full = 0
+    jami_uzek = 0
+    jami_rus = 0
+    kurs_1_jami = 0
+    kurs_1_uzbek_jami = 0
+    kurs_1_rus_jami = 0
+    kurs_2_jami = 0
+    kurs_2_uzbek_jami = 0
+    kurs_2_rus_jami = 0
+    kurs_3_jami = 0
+    kurs_3_uzbek_jami = 0
+    kurs_3_rus_jami = 0
+    kurs_4_jami = 0
+    kurs_4_uzbek_jami = 0
+    kurs_4_rus_jami = 0
+    kurs_5_jami = 0
+    kurs_5_uzbek_jami = 0
+    kurs_5_rus_jami = 0
+    kurs_6_jami = 0
+    kurs_6_uzbek_jami = 0
+    kurs_6_rus_jami = 0
+    kurs_7_jami = 0
+    kurs_7_uzbek_jami = 0
+    kurs_7_rus_jami = 0
+    fakultetlar = Faculty.objects.filter(org=org)
+    for fakultet in fakultetlar:
+
+        guruhs = Guruh.objects.filter(yonalish__faculty=fakultet)
+        for guruh in guruhs:
+            language = guruh.yonalish.language
+            course = guruh.kurs
+            jami = 0
+            budget = Budjet.objects.filter(guruhi=guruh).aggregate(jami=Sum('jami'))
+            shartnoma = Shartnoma.objects.filter(guruh=guruh).aggregate(jami=Sum('jami'))
+            if budget['jami']:
+                jami += budget['jami']
+                jami_full += budget['jami']
+            if shartnoma['jami']:
+                jami += shartnoma['jami']
+                jami_full += shartnoma['jami']
+        for k in [1, 2, 3, 4, 5, 6]:
+            guruhs = Guruh.objects.filter(org=org, bosqich='Bakalavr', kurs=k)
+            for guruh in guruhs:
+                language = guruh.yonalish.language
+                course = guruh.kurs
+                jami = 0
+                budget = Budjet.objects.filter(guruhi=guruh).aggregate(jami=Sum('jami'))
+                shartnoma = Shartnoma.objects.filter(guruh=guruh).aggregate(jami=Sum('jami'))
+                if budget['jami']:
+                    jami += budget['jami']
+                if shartnoma['jami']:
+                    jami += shartnoma['jami']
+                if language == 'O\'zbek':
+                    jami_uzek += jami
+                else:
+                    jami_rus += jami
+                if k == 1:
+                    if language == 'O\'zbek':
+                        kurs_1_uzbek_jami += jami
+                    else:
+                        kurs_1_rus_jami += jami
+                    kurs_1_jami += jami
+                elif k == 2:
+                    if language == 'O\'zbek':
+                        kurs_2_uzbek_jami += jami
+                    else:
+                        kurs_2_rus_jami += jami
+                    kurs_2_jami += jami
+                elif k == 3:
+                    if language == 'O\'zbek':
+                        kurs_3_uzbek_jami += jami
+                    else:
+                        kurs_3_rus_jami += jami
+                    kurs_3_jami += jami
+                elif k == 4:
+                    if language == 'O\'zbek':
+                        kurs_4_uzbek_jami += jami
+                    else:
+                        kurs_4_rus_jami += jami
+                    kurs_4_jami += jami
+                elif k == 5:
+                    if language == 'O\'zbek':
+                        kurs_5_uzbek_jami += jami
+                    else:
+                        kurs_5_rus_jami += jami
+                    kurs_5_jami += jami
+                elif k == 6:
+                    if language == 'O\'zbek':
+                        kurs_6_uzbek_jami += jami
+                    else:
+                        kurs_6_rus_jami += jami
+                    kurs_6_jami += jami
+                else:
+                    if language == 'O\'zbek':
+                        kurs_7_uzbek_jami += jami
+
+                    else:
+                        kurs_7_rus_jami += jami
+                    kurs_7_jami += jami
+        row += 1
+        ws.cell(row=row, column=2, value=f'{fakultet.name}')
+        ws.cell(row=row, column=4, value=jami_full)
+        ws.cell(row=row, column=5, value=jami_uzek)
+        ws.cell(row=row, column=6, value=jami_rus)
+        ws.cell(row=row, column=7, value=kurs_1_jami)
+        ws.cell(row=row, column=8, value=kurs_1_uzbek_jami)
+        ws.cell(row=row, column=9, value=kurs_1_rus_jami)
+        ws.cell(row=row, column=10, value=kurs_2_jami)
+        ws.cell(row=row, column=11, value=kurs_2_uzbek_jami)
+        ws.cell(row=row, column=12, value=kurs_2_rus_jami)
+        ws.cell(row=row, column=13, value=kurs_3_jami)
+        ws.cell(row=row, column=14, value=kurs_3_uzbek_jami)
+        ws.cell(row=row, column=15, value=kurs_3_rus_jami)
+        ws.cell(row=row, column=16, value=kurs_4_jami)
+        ws.cell(row=row, column=17, value=kurs_4_uzbek_jami)
+        ws.cell(row=row, column=18, value=kurs_4_rus_jami)
+        ws.cell(row=row, column=19, value=kurs_5_jami)
+        ws.cell(row=row, column=20, value=kurs_5_uzbek_jami)
+        ws.cell(row=row, column=21, value=kurs_5_rus_jami)
+        ws.cell(row=row, column=22, value=kurs_6_jami)
+        ws.cell(row=row, column=23, value=kurs_6_uzbek_jami)
+        ws.cell(row=row, column=24, value=kurs_6_rus_jami)
+        ws.cell(row=row, column=25, value=kurs_7_jami)
+        ws.cell(row=row, column=26, value=kurs_7_uzbek_jami)
+        ws.cell(row=row, column=27, value=kurs_7_rus_jami)
+    row+=1
+    guruhs = Guruh.objects.filter(org=org)
+
+
+
+
+
+    wb.save('talabalar.xlsx')
 
 
 exporttoexcel(org)

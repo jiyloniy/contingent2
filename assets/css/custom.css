@@ -1,5 +1,16 @@
-/*------------------------------------------------------------------
-    File Name: custom.css
--------------------------------------------------------------------*/
-
-/** ADD YOUR AWESOME CODES HERE **/
+.actives {
+    border-top: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+    border-radius: 15px;
+}
+.actives  a {
+    color: #fff;
+    quotes: none;
+    border-radius: 10px;
+}
+.sidebar_3 a:hover {
+    background-color: #ff5722;
+    color: #fff;
+    quotes: none;
+    border-radius: 15px;
+}
