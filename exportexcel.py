@@ -1,5 +1,6 @@
 import os
 import re
+from io import BytesIO
 
 import django
 
@@ -17,120 +18,39 @@ from openpyxl.styles import Alignment, Font, Border, Side, PatternFill
 from openpyxl.utils import get_column_letter
 
 
-def set_cell_properties(cell, value, alignment, font, border):
-    cell.value = value
-    cell.alignment = alignment
-    cell.font = font
-    cell.border = border
 
 
 organization_name = "Toshkent Davlat Texnnika Universiteti"
-#
-# ws.merge_cells('A1:P2')
-# set_cell_properties(ws.cell(row=1, column=1),
-#                     f"{organization_name} talabalari kontingentining {formatted_time} holati haqida umumiy ma'lumot",
-#                     Alignment(horizontal='center', vertical='center'),
-#                     Font(name=FONT_NAME, size=20, bold=True, italic=False, color=FONT_COLOR),
-#                     Border(left=Side(border_style=BORDER_STYLE, color=BORDER_COLOR),
-#                            right=Side(border_style=BORDER_STYLE, color=BORDER_COLOR),
-#                            top=Side(border_style=BORDER_STYLE, color=BORDER_COLOR),
-#                            bottom=Side(border_style=BORDER_STYLE, color=BORDER_COLOR)))
-#
-# cell_properties = [
-#     {'row': 3, 'column': 3, 'value': 'Guruhlar', 'width': True, 'merge': 'C3:C4'},
-#     {'row': 3, 'column': 4, 'value': 'Yo\'nalish', 'width': True, 'merge': 'D3:D4'},
-#     {'row': 3, 'column': 5, 'value': 'Jami', 'width': True, 'merge': 'E3:E4'},
-#     {'row': 3, 'column': 6, 'value': 'Shundan qizlar', 'width': True, 'merge': 'F3:F4'},
-#     {'row': 3, 'column': 7, 'value': 'Harbiy', 'width': True, 'merge': 'G3:G4'},
-#     {'row': 3, 'column': 8, 'value': 'Yangi qo\'shilgan', 'width': True, 'merge': 'H3:H4'},
-#     {'row': 3, 'column': 9, 'value': 'Chetlashtirilgan', 'width': True, 'merge': 'I3:I4'},
-#     {'row': 3, 'column': 10, 'value': 'Akademik tatil', 'width': True, 'merge': 'J3:J4'},
-#     {'row': 3, 'column': 11, 'value': 'Byudjet', 'width': True, 'merge': 'K3:M3'},
-#     {'row': 4, 'column': 11, 'value': 'Jami', 'width': True},
-#     {'row': 4, 'column': 12, 'value': 'Harbiy', 'width': True},
-#     {'row': 4, 'column': 13, 'value': 'Xotn qizlar', 'width': True},
-#     {'row': 3, 'column': 14, 'value': 'Shartmona', 'width': True, 'merge': 'N3:P3'},
-#     {'row': 4, 'column': 14, 'value': 'Jami', 'width': True},
-#     {'row': 4, 'column': 15, 'value': 'Harbiy', 'width': True},
-#     {'row': 4, 'column': 16, 'value': 'Xotn qizlar', 'width': True},
-#
-#     # Add more dictionaries for other cells
-# ]
-#
-# for properties in cell_properties:
-#     cell = ws.cell(row=properties['row'], column=properties['column'])
-#     set_cell_properties(cell,
-#                         properties['value'],
-#                         Alignment(horizontal='center', vertical='center'),
-#                         Font(name=FONT_NAME, size=FONT_SIZE, bold=True, italic=False, color=FONT_COLOR),
-#                         Border(left=Side(border_style=BORDER_STYLE, color=BORDER_COLOR),
-#                                right=Side(border_style=BORDER_STYLE, color=BORDER_COLOR),
-#                                top=Side(border_style=BORDER_STYLE, color=BORDER_COLOR),
-#                                bottom=Side(border_style=BORDER_STYLE, color=BORDER_COLOR)))
-#     if 'width' in properties and properties['width']:
-#         ws.column_dimensions[get_column_letter(properties['column'])].auto_size = True
-#     if 'merge' in properties:
-#         ws.merge_cells(properties['merge'])
-#
-# # d ustunni hammasiniblue qilish kerak FAQAT TEXTNI
-#
-#
-# coluns = ['C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']
-# for col in coluns:
-#     ws.column_dimensions[col].width = 17
+
 org = Organization.objects.filter(name='kiuf').first()
 
-# KURS NING NOMI C:5 DAN P:5 GACHA MERGE QILINADI VA KURNING NOMI YOZILADI
-# GURUHNING NAME G:6 DAN BOSHLANADI
-# BU GURHLAR YONALISHI OLDIN O'ZBEK KEYIN RUS TILILLARI BO'YICHA SARALANADI
-# GURUHNING YONALISHI NAME D:6 DAN BOSHLANADI
-# JAMI E:6 DAN BOSHLANADI BU JAMI BUDJET JAMI + SHARTNOMA JAMI GA TENG
-# Shundan qizlar F:6 DAN BOSHLANADI
-# Harbiy G:6 DAN BOSHLANADI
-# Yangi qo'shilgan H:6 DAN BOSHLANADI
-# Chetlashtirilgan I:6 DAN BOSHLANADI
-# Akademik tatil J:6 DAN BOSHLANADI
-# Budjet JAMI K:6 DAN BOSHLANADI
-# Budjet HARBIY L:6 DAN BOSHLANADI
-# Budjet XOTN QIZ M:6 DAN BOSHLANADI
-# Shartnoma JAMI N:6 DAN BOSHLANADI
-# Shartnoma HARBIY O:6 DAN BOSHLANADI
-# Shartnoma XOTN QIZ P:6 DAN BOSHLANADI
-
-# OLDIN 1 KURSGA BO'GLANGAN FACULTY LARNI OLIB OLAMIZ
-# 1 KURS KUNDUZGI LARGA NISBATAN
-# MANASHU FACULTETLARGA BOG'LANGAN YO'NALISHLARNI OLAMIZ
-# YO'NALISHLARGA BOG'LANGAN GURUHLARNI OLAMIZ O'ZBEK VA RUS TILILLARI BO'YICHA SARALANADI
-# SHU YONALISH TUGAGAN BO'LSA SHU YO'NALISH BO'YICHA HAMMA USTUNLAR BO'YICHA JAMI SINI HISOBLAYDI
-# KEYIN BOSHQA YO'NALISHGA O'TADI
-# YO'NALISHLAR OLDIN KUNDUZGI KEYIN SIRTQI KEYIN ESA MASOFAVIY BO'YICHA SARALANADI
-# kryin 2 kursga o'tishdan oldin hamma fakultetlarni jamlaydi
-
-FONT_NAME = 'Times New Roman'
-FONT_SIZE = 12
-FONT_COLOR = 'FF000000'
-BORDER_STYLE = 'thin'
-BORDER_COLOR = 'FF000000'
-red_color = 'FF0000FF'
-# color blue
-blue_color = 'FFFF0000'
-wb = Workbook()
-ws = wb.active
-# add auto size width of column
-
-# Hozirgi vaqtni olib, formatini belgilash
-
-now = datetime.now()
-formatted_time = now.strftime("%Y-%m-%d")
 
 
-def exporttoexcel(org):
+def exporttoexcell(org):
+    def set_cell_properties(cell, value, alignment, font, border):
+        cell.value = value
+        cell.alignment = alignment
+        cell.font = font
+        cell.border = border
+    FONT_NAME = 'Times New Roman'
+    FONT_SIZE = 12
+    FONT_COLOR = 'FF000000'
+    BORDER_STYLE = 'thin'
+    BORDER_COLOR = 'FF000000'
+    red_color = 'FF0000FF'
+    # color blue
+    blue_color = 'FFFF0000'
+    wb = Workbook()
+    ws = wb.active
+    output2 = BytesIO()
+    now = datetime.now()
+    formatted_time = now.strftime("%Y-%m-%d")
     organization_name = org.full_name
     ws.merge_cells('A1:P2')
     set_cell_properties(ws.cell(row=1, column=1),
                         f"{organization_name} talabalari kontingentining {formatted_time} holati haqida umumiy ma'lumot",
                         Alignment(horizontal='center', vertical='center'),
-                        Font(name=FONT_NAME, size=20, bold=True, italic=False, color=FONT_COLOR),
+                        Font(name=FONT_NAME, size=12, bold=True, italic=False, color=FONT_COLOR),
                         Border(left=Side(border_style=BORDER_STYLE, color=BORDER_COLOR),
                                right=Side(border_style=BORDER_STYLE, color=BORDER_COLOR),
                                top=Side(border_style=BORDER_STYLE, color=BORDER_COLOR),
@@ -1809,7 +1729,7 @@ def exporttoexcel(org):
     row += 1
 
     fakultetlar_kunduzgi = Faculty.objects.filter(org=org, facultyyonalish__turi='Kunduzgi').distinct()
-    print(fakultetlar_kunduzgi)
+
     jami = 0
     shundan_qizlar = 0
     harbiy = 0
@@ -1970,7 +1890,7 @@ def exporttoexcel(org):
                                                        fill_type="solid")
         row += 1
     fakultetlar_kunduzgi = Faculty.objects.filter(org=org, facultyyonalish__turi='Sirtqi').distinct()
-    print(fakultetlar_kunduzgi)
+
     jami = 0
     shundan_qizlar = 0
     harbiy = 0
@@ -2132,7 +2052,7 @@ def exporttoexcel(org):
         row += 1
 
     fakultetlar_kunduzgi = Faculty.objects.filter(org=org, facultyyonalish__turi='Masofaviy').distinct()
-    print(fakultetlar_kunduzgi)
+
     jami = 0
     shundan_qizlar = 0
     harbiy = 0
@@ -2293,7 +2213,7 @@ def exporttoexcel(org):
                                                        fill_type="solid")
         row += 1
     fakultetlar_kunduzgi = Faculty.objects.filter(org=org, facultyyonalish__mutahasislik_2=True).distinct()
-    print(fakultetlar_kunduzgi)
+
     jami = 0
     shundan_qizlar = 0
     harbiy = 0
@@ -2454,7 +2374,7 @@ def exporttoexcel(org):
                                                        fill_type="solid")
         row += 1
     fakultetlar_kunduzgi = Faculty.objects.filter(org=org).distinct()
-    print(fakultetlar_kunduzgi)
+
     jami = 0
     shundan_qizlar = 0
     harbiy = 0
@@ -2615,7 +2535,7 @@ def exporttoexcel(org):
                                                        fill_type="solid")
         row += 1
     fakultetlar_kunduzgi = Faculty.objects.filter(org=org).distinct()
-    print(fakultetlar_kunduzgi)
+
     jami = 0
     shundan_qizlar = 0
     harbiy = 0
@@ -2776,7 +2696,7 @@ def exporttoexcel(org):
                                                        fill_type="solid")
         row += 1
     fakultetlar_kunduzgi = Faculty.objects.filter(org=org).distinct()
-    print(fakultetlar_kunduzgi)
+
     jami = 0
     shundan_qizlar = 0
     harbiy = 0
@@ -2937,7 +2857,7 @@ def exporttoexcel(org):
                                                        fill_type="solid")
         row += 1
     fakultetlar_kunduzgi = Faculty.objects.filter(org=org).distinct()
-    print(fakultetlar_kunduzgi)
+
     jami = 0
     shundan_qizlar = 0
     harbiy = 0
@@ -3099,7 +3019,7 @@ def exporttoexcel(org):
                                                        fill_type="solid")
         row += 1
     fakultetlar_kunduzgi = Faculty.objects.filter(org=org).distinct()
-    print(fakultetlar_kunduzgi)
+
     jami = 0
     shundan_qizlar = 0
     harbiy = 0
@@ -3261,7 +3181,7 @@ def exporttoexcel(org):
                                                        fill_type="solid")
         row += 1
     fakultetlar_kunduzgi = Faculty.objects.filter(org=org).distinct()
-    print(fakultetlar_kunduzgi)
+
     jami = 0
     shundan_qizlar = 0
     harbiy = 0
@@ -3423,7 +3343,7 @@ def exporttoexcel(org):
                                                        fill_type="solid")
         row += 1
     fakultetlar_kunduzgi = Faculty.objects.filter(org=org).distinct()
-    print(fakultetlar_kunduzgi)
+
     jami = 0
     shundan_qizlar = 0
     harbiy = 0
@@ -3585,7 +3505,7 @@ def exporttoexcel(org):
                                                        fill_type="solid")
         row += 1
     fakultetlar_kunduzgi = Faculty.objects.filter(org=org).distinct()
-    print(fakultetlar_kunduzgi)
+
     jami = 0
     shundan_qizlar = 0
     harbiy = 0
@@ -3747,7 +3667,7 @@ def exporttoexcel(org):
                                                        fill_type="solid")
         row += 1
     fakultetlar_kunduzgi = Faculty.objects.filter(org=org).distinct()
-    print(fakultetlar_kunduzgi)
+
     jami = 0
     shundan_qizlar = 0
     harbiy = 0
@@ -3909,7 +3829,7 @@ def exporttoexcel(org):
                                                        fill_type="solid")
         row += 1
     fakultetlar_kunduzgi = Faculty.objects.filter(org=org).distinct()
-    print(fakultetlar_kunduzgi)
+
     jami = 0
     shundan_qizlar = 0
     harbiy = 0
@@ -4071,7 +3991,7 @@ def exporttoexcel(org):
                                                        fill_type="solid")
         row += 1
     fakultetlar_kunduzgi = Faculty.objects.filter(org=org).distinct()
-    print(fakultetlar_kunduzgi)
+
     jami = 0
     shundan_qizlar = 0
     harbiy = 0
@@ -4233,7 +4153,7 @@ def exporttoexcel(org):
                                                        fill_type="solid")
         row += 1
     fakultetlar_kunduzgi = Faculty.objects.filter(org=org).distinct()
-    print(fakultetlar_kunduzgi)
+
     jami = 0
     shundan_qizlar = 0
     harbiy = 0
@@ -4395,7 +4315,7 @@ def exporttoexcel(org):
                                                        fill_type="solid")
         row += 1
     fakultetlar_kunduzgi = Faculty.objects.filter(org=org).distinct()
-    print(fakultetlar_kunduzgi)
+
     jami = 0
     shundan_qizlar = 0
     harbiy = 0
@@ -4555,6 +4475,10 @@ def exporttoexcel(org):
                                                        fill_type="solid")
         row += 1
 
-    wb.save('talabalar2222.xlsx')
+    wb.save(output2)
+    output2.seek(0)
+    return output2
+    # wb.save('talabalar.xlsx')
+exporttoexcell(org)
 
-exporttoexcel(org)
+import threading
