@@ -70,7 +70,7 @@ def merge_excel_files(excel_files):
         for merge_range in merge_cells:
             merged_sheet.merge_cells(merge_range.coord)
 
-    merged_workbook.save('talabalar.xlsx')
+    merged_workbook.save('talabalar2.xlsx')
 
 
 # Generate Excel files
