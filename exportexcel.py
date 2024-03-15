@@ -4479,6 +4479,3 @@ def exporttoexcell(org):
     output2.seek(0)
     return output2
     # wb.save('talabalar.xlsx')
-exporttoexcell(org)
-
-import threading

@@ -1516,5 +1516,4 @@ def exporttoexcel(org):
     wb.save(output1)
     output1.seek(0)
     return output1
-    # wb.save('talabalar.xlsx')
-exporttoexcel(org)
+

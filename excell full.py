@@ -9,14 +9,18 @@ django.setup()
 
 from ecxel2 import exporttoexcel
 from exportexcel import exporttoexcell
+from excel3 import exporttoexcel3
 from user.models import Organization
 
 org = Organization.objects.filter(name='kiuf').first()
 
+
 def generate_excel_files(org):
-    output2 = exporttoexcel(org)
     output1 = exporttoexcell(org)
-    return [output1, output2]
+    output2 = exporttoexcel(org)
+    output3 = exporttoexcel3(org)
+    return [output1, output2, output3]
+
 
 def copy_cell_style(source_cell, dest_cell):
     dest_cell.font = copy_font(source_cell.font)
@@ -24,8 +28,10 @@ def copy_cell_style(source_cell, dest_cell):
     dest_cell.fill = copy_fill(source_cell.fill)
     dest_cell.alignment = copy_alignment(source_cell.alignment)
 
+
 def copy_font(font):
     return Font(name=font.name, size=font.size, bold=font.bold, italic=font.italic, color=font.color)
+
 
 def copy_border(border):
     if border is None:
@@ -33,16 +39,20 @@ def copy_border(border):
     return Border(left=copy_side(border.left), right=copy_side(border.right),
                   top=copy_side(border.top), bottom=copy_side(border.bottom))
 
+
 def copy_side(side):
     if side is None:
         return None
     return Side(border_style=side.border_style, color=side.color)
 
+
 def copy_fill(fill):
     return PatternFill(fill_type=fill.fill_type, start_color=fill.start_color, end_color=fill.end_color)
 
+
 def copy_alignment(alignment):
     return Alignment(horizontal=alignment.horizontal, vertical=alignment.vertical)
+
 
 def merge_excel_files(excel_files):
     merged_output = BytesIO()
