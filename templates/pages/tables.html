@@ -2,84 +2,84 @@
 {% load static %}
 {% block title %}Fakultetlar{% endblock %}
 {% block content %}
-<style>
-    /* Modal */
-    .modal-dialog {
-        max-width: 800px; /* Increased modal width */
-    }
+    <style>
+        /* Modal */
+        .modal-dialog {
+            max-width: 800px; /* Increased modal width */
+        }
 
-    .modal-content {
-        border-radius: 8px;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
-    }
+        .modal-content {
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+        }
 
-    .modal-header {
-        background-color: #007bff;
-        color: #fff;
-        border-radius: 8px 8px 0 0;
-    }
+        .modal-header {
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 8px 8px 0 0;
+        }
 
-    .modal-title {
-        font-size: 1.8rem; /* Increased font size */
-        font-weight: 600;
-    }
+        .modal-title {
+            font-size: 1.8rem; /* Increased font size */
+            font-weight: 600;
+        }
 
-    .btn-close {
-        background-color: #fff;
-        border-radius: 50%;
-        opacity: 0.8;
-    }
+        .btn-close {
+            background-color: #fff;
+            border-radius: 50%;
+            opacity: 0.8;
+        }
 
-    /* Tabs */
-    .nav-tabs {
-        border-bottom: 1px solid #dee2e6;
-    }
+        /* Tabs */
+        .nav-tabs {
+            border-bottom: 1px solid #dee2e6;
+        }
 
-    .nav-item {
-        margin-right: 1rem;
-    }
+        .nav-item {
+            margin-right: 1rem;
+        }
 
-    .nav-link {
-        color: #6c757d;
-        font-weight: 500;
-        font-size: 1.1rem; /* Increased font size */
-        border-radius: 0.25rem 0.25rem 0 0;
-    }
+        .nav-link {
+            color: #6c757d;
+            font-weight: 500;
+            font-size: 1.1rem; /* Increased font size */
+            border-radius: 0.25rem 0.25rem 0 0;
+        }
 
-    .nav-link.active {
-        color: #007bff;
-        background-color: #f8f9fa;
-        border-color: #dee2e6 #dee2e6 #fff;
-    }
+        .nav-link.active {
+            color: #007bff;
+            background-color: #f8f9fa;
+            border-color: #dee2e6 #dee2e6 #fff;
+        }
 
-    .tab-content {
-        padding: 1rem;
-    }
+        .tab-content {
+            padding: 1rem;
+        }
 
-    .tab-pane {
-        background-color: #f8f9fa;
-        border-radius: 0 0 0.25rem 0.25rem;
-    }
+        .tab-pane {
+            background-color: #f8f9fa;
+            border-radius: 0 0 0.25rem 0.25rem;
+        }
 
-    /* Button */
-    button[type="submit"] {
-        background-color: #007bff;
-        color: #fff;
-        border: none;
-        padding: 0.5rem 1rem;
-        border-radius: 0.25rem;
-        font-size: 1.1rem; /* Increased font size */
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
+        /* Button */
+        button[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            font-size: 1.1rem; /* Increased font size */
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
 
-    button[type="submit"]:hover {
-        background-color: #0069d9;
-    }
+        button[type="submit"]:hover {
+            background-color: #0069d9;
+        }
 
 
-</style>
+    </style>
     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"
          data-mdb-backdrop="static" data-mdb-keyboard="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -112,40 +112,34 @@
                 <!-- Tabs navs -->
 
                 <!-- Tabs content -->
-             <form method="post" action="{% url 'group_create' %}">
-              {% csrf_token %}
-                <div class="tab-content" id="ex-with-icons-content">
-                    <div class="tab-pane fade show active" id="ex-with-icons-tabs-1" role="tabpanel"
-                         aria-labelledby="ex-with-icons-tab-1">
-                        {{ form.as_p }}
+                <form method="post" action="{% url 'group_create' %}">
+                    {% csrf_token %}
+                    <div class="tab-content" id="ex-with-icons-content">
+                        <div class="tab-pane fade show active" id="ex-with-icons-tabs-1" role="tabpanel"
+                             aria-labelledby="ex-with-icons-tab-1">
+                            {{ form.as_p }}
+
+                        </div>
+                        <div class="tab-pane fade" id="ex-with-icons-tabs-2" role="tabpanel"
+                             aria-labelledby="ex-with-icons-tab-2">
+                            <h2>Shartmonoma</h2>
+                            {{ shartmonoma.management_form }}
+                            {% for form in shartmonoma %}
+                                {{ form.as_p }}
+                            {% endfor %}
+                        </div>
+                        <div class="tab-pane fade" id="ex-with-icons-tabs-3" role="tabpanel"
+                             aria-labelledby="ex-with-icons-tab-3">
+                            <h2>Budjet</h2>
+                            {{ budjet.management_form }}
+                            {% for form in budjet %}
+                                {{ form.as_p }}
+                            {% endfor %}
+                            <button type="submit">Create Group</button>
+                        </div>
 
                     </div>
-                    <div class="tab-pane fade" id="ex-with-icons-tabs-2" role="tabpanel"
-                         aria-labelledby="ex-with-icons-tab-2">
-                        <h2>Shartmonoma</h2>
-                    {{ shartmonoma.management_form }}
-                    {% for form in shartmonoma %}
-                        {{ form.as_p }}
-                    {% endfor %}
-                    </div>
-                    <div class="tab-pane fade" id="ex-with-icons-tabs-3" role="tabpanel"
-                         aria-labelledby="ex-with-icons-tab-3">
-                        <h2>Budjet</h2>
-                    {{ budjet.management_form }}
-                    {% for form in budjet %}
-                        {{ form.as_p }}
-                    {% endfor %}
-                      <button type="submit">Create Group</button>
-                    </div>
-
-                </div>
-                <!-- Tabs content -->
-
-
-
-
-
-
+                    <!-- Tabs content -->
 
 
                 </form>
@@ -162,12 +156,14 @@
                             <div style="padding-right: 12px;">
                                 <button type="button" class="btn btn-primary">Export Exel</button>
                             </div>
-                            {% if perms.user.add_guruh %}
-                            <a href="{% url 'group_create' %}" class="btn btn-success float-right" +
-                               >
-                                <i class="fa fa-plus-circle"></i> &nbsp; Add gorup
-                            </a>
-                            {% endif %}
+                            {% with add_guruh_permission=perms.user.add_guruh %}
+                                {% if add_guruh_permission %}
+                                    <a href="{% url 'group_create' %}" class="btn btn-success float-right">
+                                        <i class="fa fa-plus-circle"></i> &nbsp; Add gorup
+                                    </a>
+                                {% endif %}
+                            {% endwith %}
+
                         </div>
                     </div>
                 </div>
@@ -177,88 +173,10 @@
             </div>
             <!-- end progress bar -->
         </div>
-      <div class="col-12 grid-margin">
-               <div class="card">
-                 <div class="card-body">
-                   <h4 class="card-title">Guruhlar</h4>
-                   <div class="table-responsive">
-                     <table class="table" id="paginationTable">
-                       <thead>
-                         <tr>
-                           <th>
-                             <div class="form-check form-check-muted m-0">
-                               <label class="form-check-label">
-                               </label>
-                             </div>
-                           </th>
-                           <th> Client Name </th>
-                           <th> Order No </th>
-                           <th> Product Cost </th>
-                           <th> Project </th>
-                           <th> Payment Mode </th>
-                           <th> Crud </th>
-                         </tr>
-                       </thead>
-                       <tbody>
-                         <tr>
-                           <td>
-                             <div class="form-check form-check-muted m-0">
-                               <label class="form-check-label">
-                               </label>
-                             </div>
-                           </td>
-                           <td>
-
-                             <span class="pl-2">Sallie Reyes</span>
-                           </td>
-                           <td> 02312 </td>
-                           <td> $14,500 </td>
-                           <td> Website </td>
-                           <td> Credit card </td>
-                           <td>
-                            <a href="/dashboard/bookdelete/43/" class="btn btn-primary btn-lg"><i class="fa fa-pencil" style="color: #fff;"></i></a>
-                            <a href="/dashboard/bookdelete/43/" class="btn btn-danger btn-lg"><i class="fa fa-mail-reply" style="color: #fff;"></i></a>
-                            <a href="/dashboard/bookdelete/43/" class="btn btn-success btn-lg"><i class="fa fa-check-square" style="color: #fff;"></i></a>
-                           </td>
-                         </tr>
-                         {% for group in groups %}
-                         	<tr>
-                           <td>
-                             <div class="form-check form-check-muted m-0">
-                               <label class="form-check-label">
-                               </label>
-                             </div>
-                           </td>
-                           <td>
-
-                             <span class="pl-2">{{ group.name }}</span>
-                           </td>
-                           <td> {{ group.yonalish|upper|slice:":15"}} </td>
-                           <td> {{ group.id }} </td>
-                           <td> Website </td>
-                           <td> Credit card </td>
-                           <td>
-                            <a href="{% url 'guruhupdate' group.id %}" class="btn btn-primary btn-lg"><i class="fa fa-pencil" style="color: #fff;"></i></a>
-                            <a href="/dashboard/bookdelete/43/" class="btn btn-danger btn-lg"><i class="fa fa-mail-reply" style="color: #fff;"></i></a>
-                            <a href="/dashboard/bookdelete/43/" class="btn btn-success btn-lg"><i class="fa fa-check-square" style="color: #fff;"></i></a>
-                           </td>
-                         </tr>
-                         {% empty %}
-
-                         {% endfor %}
-
-
-
-                       </tbody>
-                     </table>
-                   </div>
-                 </div>
-               </div>
-             </div>
         <div class="col-12 grid-margin">
             <div class="card">
                 <div class="card-body">
-                    <h4 class="card-title">Groups</h4>
+                    <h4 class="card-title">Guruhlar</h4>
                     <div class="table-responsive">
                         <table class="table" id="paginationTable">
                             <thead>
@@ -269,15 +187,16 @@
                                         </label>
                                     </div>
                                 </th>
-                                <th> Group name</th>
-                                <th> Nomer</th>
-                                <th> All students</th>
-                                <th> kurs</th>
-                                <th> yonalish</th>
+                                <th> Client Name</th>
+                                <th> Order No</th>
+                                <th> Product Cost</th>
+                                <th> Project</th>
+                                <th> Payment Mode</th>
                                 <th> Crud</th>
                             </tr>
                             </thead>
                             <tbody>
+
                             {% for group in groups %}
                                 <tr>
                                     <td>
@@ -290,23 +209,21 @@
 
                                         <span class="pl-2">{{ group.name }}</span>
                                     </td>
-                                    <td> 02312</td>
-                                    <td> {{ group.allstudents }}</td>
-                                    <td> {{ group.kurs.name }}</td>
-                                    <td> {{ group.yonalish }}</td>
+                                    <td> {{ group.yonalish|upper|slice:":15" }} </td>
+                                    <td> {{ group.id }} </td>
+                                    <td> Website</td>
+                                    <td> Credit card</td>
                                     <td>
-
-                                        {% if perms.user.change_guruh %}
-                                        <a href={% url 'guruhupdate' group.pk %} class="btn btn-primary btn-lg"><i
+                                        <a href="{% url 'guruhupdate' group.id %}" class="btn btn-primary btn-lg"><i
                                                 class="fa fa-pencil" style="color: #fff;"></i></a>
-                                        {% endif %}
-                                        {% if perms.user.delete_guruh %}
-                                        <a href="{% url 'guruhdelete' group.pk %}" class="btn btn-danger btn-lg"><i
+                                        <a href="/dashboard/bookdelete/43/" class="btn btn-danger btn-lg"><i
                                                 class="fa fa-mail-reply" style="color: #fff;"></i></a>
-                                        {% endif %}
-
+                                        <a href="/dashboard/bookdelete/43/" class="btn btn-success btn-lg"><i
+                                                class="fa fa-check-square" style="color: #fff;"></i></a>
                                     </td>
                                 </tr>
+                            {% empty %}
+
                             {% endfor %}
 
 

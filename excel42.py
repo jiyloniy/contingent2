@@ -22,8 +22,8 @@ from user.models import Faculty, Budjet, Shartnoma, Organization, Yonalish, Guru
 org = Organization.objects.filter(name='kiuf').first()
 
 
-def exporttoexcel3(org):
-    from openpyxl.styles import Alignment, Font, Border, Side, PatternFill
+def exporttoexcel4(org):
+    from openpyxl.styles import Alignment, Font, Border, Side
     from openpyxl import Workbook
 
     now = datetime.now()
@@ -55,7 +55,7 @@ def exporttoexcel3(org):
     formatted_time = now.strftime("%Y-%m-%d")
     wb = Workbook()
     ws = wb.active
-    output1 = BytesIO()
+    output4 = BytesIO()
     organization_name = org.full_name
 
     ws.merge_cells('A1:AD2')
@@ -1205,363 +1205,425 @@ def exporttoexcel3(org):
             ws.cell(row=row, column=26, value=kurs_7_erkak_jami)
             ws.cell(row=row, column=27, value=kurs_7_ayol_jami)
     row += 1
-
     jami_full = 0
-    jami_uzek = 0
-    jami_rus = 0
     kurs_1_jami = 0
-    kurs_1_grand_jami = 0
-    kurs_1_kontrakt_jami = 0
+    kurs_1_erkak_jami = 0
+    kurs_1_ayol_jami = 0
     kurs_2_jami = 0
-    kurs_2_grand_jami = 0
-    kurs_2_kontrakt_jami = 0
+    kurs_2_erkak_jami = 0
+    kurs_2_ayol_jami = 0
     kurs_3_jami = 0
-    kurs_3_grand_jami = 0
-    kurs_3_kontrakt_jami = 0
+    kurs_3_erkak_jami = 0
+    kurs_3_ayol_jami = 0
     kurs_4_jami = 0
-    kurs_4_grand_jami = 0
-    kurs_4_kontrakt_jami = 0
+    kurs_4_erkak_jami = 0
+    kurs_4_ayol_jami = 0
     kurs_5_jami = 0
-    kurs_5_grand_jami = 0
-    kurs_5_kontrakt_jami = 0
+    kurs_5_erkak_jami = 0
+    kurs_5_ayol_jami = 0
     kurs_6_jami = 0
-    kurs_6_grand_jami = 0
-    kurs_6_kontrakt_jami = 0
+    kurs_6_erkak_jami = 0
+    kurs_6_ayol_jami = 0
     kurs_7_jami = 0
-    kurs_7_grand_jami = 0
-    kurs_7_kontrakt_jami = 0
+    kurs_7_erkak_jami = 0
+    kurs_7_ayol_jami = 0
+    jami_full_erkak = 0
+    jami_full_ayol = 0
 
     guruhs = Guruh.objects.filter(org=org, bosqich='Bakalavr')
+    budjet = Guruh.objects.filter(org=org, bosqich='Bakalavr').aggregate(budget=Sum('guruhbudjet__jami'))
+    shartnoma = Guruh.objects.filter(org=org, bosqich='Bakalavr').aggregate(budget=Sum('guruhshartnoma__jami'))
+    budget2 = Guruh.objects.filter(org=org, bosqich='Bakalavr').aggregate(ayollar=Sum('guruhbudjet__xotin_qiz'))
+    budget3 = Guruh.objects.filter(org=org, bosqich='Bakalavr').aggregate(ayollar=Sum('guruhshartnoma__xotin_qiz'))
+    jami = 0
+    jami_ayol = 0
+    jami_erkak = 0
+    if budjet['budget']:
+        jami += budjet['budget']
+        jami_full += budjet['budget']
+        if budget2['ayollar']:
+            jami_ayol += budget2['ayollar']
+            jami_erkak += budjet['budget'] - budget2['ayollar']
+            jami_full_ayol += budget2['ayollar']
+            jami_full_erkak += budjet['budget'] - budget2['ayollar']
+        else:
+            jami_erkak += budjet['budget']
+            jami_full_erkak += budjet['budget']
+    if shartnoma['budget']:
+        jami += shartnoma['budget']
+        jami_full += shartnoma['budget']
+        if budget3['ayollar']:
+            jami_ayol += budget3['ayollar']
+            jami_erkak += shartnoma['budget'] - budget3['ayollar']
+            jami_full_ayol += budget3['ayollar']
+            jami_full_erkak += shartnoma['budget'] - budget3['ayollar']
+        else:
+            jami_erkak += shartnoma['budget']
+            jami_full_erkak += shartnoma['budget']
 
     for guruh in guruhs:
         jami = 0
+        jami_ayol = 0
+        jami_erkak = 0
         budget = Budjet.objects.filter(guruhi=guruh).aggregate(jami=Sum('jami'))
         shartnoma = Shartnoma.objects.filter(guruh=guruh).aggregate(jami=Sum('jami'))
+        budget2 = Budjet.objects.filter(guruhi=guruh).aggregate(ayollar=Sum('xotin_qiz'))
+        budget3 = Shartnoma.objects.filter(guruh=guruh).aggregate(ayollar=Sum('xotin_qiz'))
+        if budget['jami']:
+            jami += budget['jami']
+            if budget2['ayollar']:
+                jami_ayol += budget2['ayollar']
+                jami_erkak += budget['jami'] - budget2['ayollar']
+            else:
+                jami_erkak += budget['jami']
+                jami_full_erkak += budget['jami']
+        if shartnoma['jami']:
+            jami += shartnoma['jami']
+            if budget3['ayollar']:
+                jami_ayol += budget3['ayollar']
+                jami_erkak += shartnoma['jami'] - budget3['ayollar']
+            else:
+                jami_erkak += shartnoma['jami']
+                jami_full_erkak += shartnoma['jami']
 
-        budget_jami = budget.get('jami', 0)
-        shartnoma_jami = shartnoma.get('jami', 0)
-
-        if budget_jami:
-            jami_uzek += budget_jami
-            jami += budget_jami
-            jami_full += budget_jami
-
-        if shartnoma_jami:
-            jami_rus += shartnoma_jami
-            jami += shartnoma_jami
-            jami_full += shartnoma_jami
-
-        course = guruh.kurs
-
-        if course == 1:
+        if guruh.kurs == 1:
             kurs_1_jami += jami
-            if budget_jami:
-                kurs_1_grand_jami += budget_jami
-            if shartnoma_jami:
-                kurs_1_kontrakt_jami += shartnoma_jami
-        elif course == 2:
+            kurs_1_erkak_jami += jami_erkak
+            kurs_1_ayol_jami += jami_ayol
+        elif guruh.kurs == 2:
             kurs_2_jami += jami
-            if budget_jami:
-                kurs_2_grand_jami += budget_jami
-            if shartnoma_jami:
-                kurs_2_kontrakt_jami += shartnoma_jami
-        elif course == 3:
+            kurs_2_erkak_jami += jami_erkak
+            kurs_2_ayol_jami += jami_ayol
+        elif guruh.kurs == 3:
             kurs_3_jami += jami
-            if budget_jami:
-                kurs_3_grand_jami += budget_jami
-            if shartnoma_jami:
-                kurs_3_kontrakt_jami += shartnoma_jami
-        elif course == 4:
+            kurs_3_erkak_jami += jami_erkak
+            kurs_3_ayol_jami += jami_ayol
+        elif guruh.kurs == 4:
             kurs_4_jami += jami
-            if budget_jami:
-                kurs_4_grand_jami += budget_jami
-            if shartnoma_jami:
-                kurs_4_kontrakt_jami += shartnoma_jami
-        elif course == 5:
+            kurs_4_erkak_jami += jami_erkak
+            kurs_4_ayol_jami += jami_ayol
+        elif guruh.kurs == 5:
             kurs_5_jami += jami
-            if budget_jami:
-                kurs_5_grand_jami += budget_jami
-            if shartnoma_jami:
-                kurs_5_kontrakt_jami += shartnoma_jami
-        elif course == 6:
+            kurs_5_erkak_jami += jami_erkak
+            kurs_5_ayol_jami += jami_ayol
+        elif guruh.kurs == 6:
             kurs_6_jami += jami
-            if budget_jami:
-                kurs_6_grand_jami += budget_jami
-            if shartnoma_jami:
-                kurs_6_kontrakt_jami += shartnoma_jami
+            kurs_6_erkak_jami += jami_erkak
+            kurs_6_ayol_jami += jami_ayol
         else:
             kurs_7_jami += jami
-            if budget_jami:
-                kurs_7_grand_jami += budget_jami
-            if shartnoma_jami:
-                kurs_7_kontrakt_jami += shartnoma_jami
+            kurs_7_erkak_jami += jami_erkak
+            kurs_7_ayol_jami += jami_ayol
 
     row += 1
     ws.cell(row=row, column=2, value='Bakalavr jami')
     ws.cell(row=row, column=4, value=jami_full)
-    ws.cell(row=row, column=5, value=jami_uzek)
-    ws.cell(row=row, column=6, value=jami_rus)
+    ws.cell(row=row, column=5, value=jami_full_ayol)
+    ws.cell(row=row, column=6, value=jami_full_erkak)
     ws.cell(row=row, column=7, value=kurs_1_jami)
-    ws.cell(row=row, column=8, value=kurs_1_grand_jami)
-    ws.cell(row=row, column=9, value=kurs_1_kontrakt_jami)
+    ws.cell(row=row, column=8, value=kurs_1_erkak_jami)
+    ws.cell(row=row, column=9, value=kurs_1_ayol_jami)
     ws.cell(row=row, column=10, value=kurs_2_jami)
-    ws.cell(row=row, column=11, value=kurs_2_grand_jami)
-    ws.cell(row=row, column=12, value=kurs_2_kontrakt_jami)
+    ws.cell(row=row, column=11, value=kurs_2_erkak_jami)
+    ws.cell(row=row, column=12, value=kurs_2_ayol_jami)
     ws.cell(row=row, column=13, value=kurs_3_jami)
-    ws.cell(row=row, column=14, value=kurs_3_grand_jami)
-    ws.cell(row=row, column=15, value=kurs_3_kontrakt_jami)
+    ws.cell(row=row, column=14, value=kurs_3_erkak_jami)
+    ws.cell(row=row, column=15, value=kurs_3_ayol_jami)
     ws.cell(row=row, column=16, value=kurs_4_jami)
-    ws.cell(row=row, column=17, value=kurs_4_grand_jami)
-    ws.cell(row=row, column=18, value=kurs_4_kontrakt_jami)
+    ws.cell(row=row, column=17, value=kurs_4_erkak_jami)
+    ws.cell(row=row, column=18, value=kurs_4_ayol_jami)
     ws.cell(row=row, column=19, value=kurs_5_jami)
-    ws.cell(row=row, column=20, value=kurs_5_grand_jami)
-    ws.cell(row=row, column=21, value=kurs_5_kontrakt_jami)
+    ws.cell(row=row, column=20, value=kurs_5_erkak_jami)
+    ws.cell(row=row, column=21, value=kurs_5_ayol_jami)
     ws.cell(row=row, column=22, value=kurs_6_jami)
-    ws.cell(row=row, column=23, value=kurs_6_grand_jami)
-    ws.cell(row=row, column=24, value=kurs_6_kontrakt_jami)
+    ws.cell(row=row, column=23, value=kurs_6_erkak_jami)
+    ws.cell(row=row, column=24, value=kurs_6_ayol_jami)
     ws.cell(row=row, column=25, value=kurs_7_jami)
-    ws.cell(row=row, column=26, value=kurs_7_grand_jami)
-    ws.cell(row=row, column=27, value=kurs_7_kontrakt_jami)
+    ws.cell(row=row, column=26, value=kurs_7_erkak_jami)
+    ws.cell(row=row, column=27, value=kurs_7_ayol_jami)
+
 
     row += 1
 
     fakultetlar = Faculty.objects.filter(org=org)
     for fakultet in fakultetlar:
         jami_full = 0
-        jami_uzek = 0
-        jami_rus = 0
         kurs_1_jami = 0
-        kurs_1_grand_jami = 0
-        kurs_1_kontrakt_jami = 0
+        kurs_1_erkak_jami = 0
+        kurs_1_ayol_jami = 0
         kurs_2_jami = 0
-        kurs_2_grand_jami = 0
-        kurs_2_kontrakt_jami = 0
+        kurs_2_erkak_jami = 0
+        kurs_2_ayol_jami = 0
         kurs_3_jami = 0
-        kurs_3_grand_jami = 0
-        kurs_3_kontrakt_jami = 0
+        kurs_3_erkak_jami = 0
+        kurs_3_ayol_jami = 0
         kurs_4_jami = 0
-        kurs_4_grand_jami = 0
-        kurs_4_kontrakt_jami = 0
+        kurs_4_erkak_jami = 0
+        kurs_4_ayol_jami = 0
         kurs_5_jami = 0
-        kurs_5_grand_jami = 0
-        kurs_5_kontrakt_jami = 0
+        kurs_5_erkak_jami = 0
+        kurs_5_ayol_jami = 0
         kurs_6_jami = 0
-        kurs_6_grand_jami = 0
-        kurs_6_kontrakt_jami = 0
+        kurs_6_erkak_jami = 0
+        kurs_6_ayol_jami = 0
         kurs_7_jami = 0
-        kurs_7_grand_jami = 0
-        kurs_7_kontrakt_jami = 0
+        kurs_7_erkak_jami = 0
+        kurs_7_ayol_jami = 0
+        jami_full_erkak = 0
+        jami_full_ayol = 0
         guruhs = Guruh.objects.filter(yonalish__faculty=fakultet)
+
+        budjet = Guruh.objects.filter(yonalish__faculty=fakultet).aggregate(budget=Sum('guruhbudjet__jami'))
+        shartnoma = Guruh.objects.filter(yonalish__faculty=fakultet).aggregate(budget=Sum('guruhshartnoma__jami'))
+        budget2 = Guruh.objects.filter(yonalish__faculty=fakultet).aggregate(ayollar=Sum('guruhbudjet__xotin_qiz'))
+        budget3 = Guruh.objects.filter(yonalish__faculty=fakultet).aggregate(ayollar=Sum('guruhshartnoma__xotin_qiz'))
+        jami = 0
+        jami_ayol = 0
+        jami_erkak = 0
+        if budjet['budget']:
+            jami += budjet['budget']
+            jami_full += budjet['budget']
+            if budget2['ayollar']:
+                jami_ayol += budget2['ayollar']
+                jami_erkak += budjet['budget'] - budget2['ayollar']
+                jami_full_ayol += budget2['ayollar']
+                jami_full_erkak += budjet['budget'] - budget2['ayollar']
+            else:
+                jami_erkak += budjet['budget']
+                jami_full_erkak += budjet['budget']
+        if shartnoma['budget']:
+            jami += shartnoma['budget']
+            jami_full += shartnoma['budget']
+            if budget3['ayollar']:
+                jami_ayol += budget3['ayollar']
+                jami_erkak += shartnoma['budget'] - budget3['ayollar']
+                jami_full_ayol += budget3['ayollar']
+                jami_full_erkak += shartnoma['budget'] - budget3['ayollar']
+            else:
+                jami_erkak += shartnoma['budget']
+                jami_full_erkak += shartnoma['budget']
         for guruh in guruhs:
             jami = 0
+            jami_ayol = 0
+            jami_erkak = 0
             budget = Budjet.objects.filter(guruhi=guruh).aggregate(jami=Sum('jami'))
             shartnoma = Shartnoma.objects.filter(guruh=guruh).aggregate(jami=Sum('jami'))
+            budget2 = Budjet.objects.filter(guruhi=guruh).aggregate(ayollar=Sum('xotin_qiz'))
+            budget3 = Shartnoma.objects.filter(guruh=guruh).aggregate(ayollar=Sum('xotin_qiz'))
+            if budget['jami']:
+                jami += budget['jami']
+                if budget2['ayollar']:
+                    jami_ayol += budget2['ayollar']
+                    jami_erkak += budget['jami'] - budget2['ayollar']
+                else:
+                    jami_erkak += budget['jami']
+                    jami_full_erkak += budget['jami']
+            if shartnoma['jami']:
+                jami += shartnoma['jami']
+                if budget3['ayollar']:
+                    jami_ayol += budget3['ayollar']
+                    jami_erkak += shartnoma['jami'] - budget3['ayollar']
+                else:
+                    jami_erkak += shartnoma['jami']
+                    jami_full_erkak += shartnoma['jami']
 
-            budget_jami = budget.get('jami', 0)
-            shartnoma_jami = shartnoma.get('jami', 0)
-
-            if budget_jami:
-                jami_uzek += budget_jami
-                jami += budget_jami
-                jami_full += budget_jami
-
-            if shartnoma_jami:
-                jami_rus += shartnoma_jami
-                jami += shartnoma_jami
-                jami_full += shartnoma_jami
-
-            course = guruh.kurs
-
-            if course == 1:
+            if guruh.kurs == 1:
                 kurs_1_jami += jami
-                if budget_jami:
-                    kurs_1_grand_jami += budget_jami
-                if shartnoma_jami:
-                    kurs_1_kontrakt_jami += shartnoma_jami
-            elif course == 2:
+                kurs_1_erkak_jami += jami_erkak
+                kurs_1_ayol_jami += jami_ayol
+            elif guruh.kurs == 2:
                 kurs_2_jami += jami
-                if budget_jami:
-                    kurs_2_grand_jami += budget_jami
-                if shartnoma_jami:
-                    kurs_2_kontrakt_jami += shartnoma_jami
-            elif course == 3:
+                kurs_2_erkak_jami += jami_erkak
+                kurs_2_ayol_jami += jami_ayol
+            elif guruh.kurs == 3:
                 kurs_3_jami += jami
-                if budget_jami:
-                    kurs_3_grand_jami += budget_jami
-                if shartnoma_jami:
-                    kurs_3_kontrakt_jami += shartnoma_jami
-            elif course == 4:
+                kurs_3_erkak_jami += jami_erkak
+                kurs_3_ayol_jami += jami_ayol
+            elif guruh.kurs == 4:
                 kurs_4_jami += jami
-                if budget_jami:
-                    kurs_4_grand_jami += budget_jami
-                if shartnoma_jami:
-                    kurs_4_kontrakt_jami += shartnoma_jami
-            elif course == 5:
+                kurs_4_erkak_jami += jami_erkak
+                kurs_4_ayol_jami += jami_ayol
+            elif guruh.kurs == 5:
                 kurs_5_jami += jami
-                if budget_jami:
-                    kurs_5_grand_jami += budget_jami
-                if shartnoma_jami:
-                    kurs_5_kontrakt_jami += shartnoma_jami
-            elif course == 6:
+                kurs_5_erkak_jami += jami_erkak
+                kurs_5_ayol_jami += jami_ayol
+            elif guruh.kurs == 6:
                 kurs_6_jami += jami
-                if budget_jami:
-                    kurs_6_grand_jami += budget_jami
-                if shartnoma_jami:
-                    kurs_6_kontrakt_jami += shartnoma_jami
+                kurs_6_erkak_jami += jami_erkak
+                kurs_6_ayol_jami += jami_ayol
             else:
                 kurs_7_jami += jami
-                if budget_jami:
-                    kurs_7_grand_jami += budget_jami
-                if shartnoma_jami:
-                    kurs_7_kontrakt_jami += shartnoma_jami
+                kurs_7_erkak_jami += jami_erkak
+                kurs_7_ayol_jami += jami_ayol
 
-        row += 1
+
         ws.cell(row=row, column=2, value=f'{fakultet.name}')
         ws.cell(row=row, column=4, value=jami_full)
-        ws.cell(row=row, column=5, value=jami_uzek)
-        ws.cell(row=row, column=6, value=jami_rus)
+        ws.cell(row=row, column=5, value=jami_full_ayol)
+        ws.cell(row=row, column=6, value=jami_full_erkak)
         ws.cell(row=row, column=7, value=kurs_1_jami)
-        ws.cell(row=row, column=8, value=kurs_1_grand_jami)
-        ws.cell(row=row, column=9, value=kurs_1_kontrakt_jami)
+        ws.cell(row=row, column=8, value=kurs_1_erkak_jami)
+        ws.cell(row=row, column=9, value=kurs_1_ayol_jami)
         ws.cell(row=row, column=10, value=kurs_2_jami)
-        ws.cell(row=row, column=11, value=kurs_2_grand_jami)
-        ws.cell(row=row, column=12, value=kurs_2_kontrakt_jami)
+        ws.cell(row=row, column=11, value=kurs_2_erkak_jami)
+        ws.cell(row=row, column=12, value=kurs_2_ayol_jami)
         ws.cell(row=row, column=13, value=kurs_3_jami)
-        ws.cell(row=row, column=14, value=kurs_3_grand_jami)
-        ws.cell(row=row, column=15, value=kurs_3_kontrakt_jami)
+        ws.cell(row=row, column=14, value=kurs_3_erkak_jami)
+        ws.cell(row=row, column=15, value=kurs_3_ayol_jami)
         ws.cell(row=row, column=16, value=kurs_4_jami)
-        ws.cell(row=row, column=17, value=kurs_4_grand_jami)
-        ws.cell(row=row, column=18, value=kurs_4_kontrakt_jami)
+        ws.cell(row=row, column=17, value=kurs_4_erkak_jami)
+        ws.cell(row=row, column=18, value=kurs_4_ayol_jami)
         ws.cell(row=row, column=19, value=kurs_5_jami)
-        ws.cell(row=row, column=20, value=kurs_5_grand_jami)
-        ws.cell(row=row, column=21, value=kurs_5_kontrakt_jami)
+        ws.cell(row=row, column=20, value=kurs_5_erkak_jami)
+        ws.cell(row=row, column=21, value=kurs_5_ayol_jami)
         ws.cell(row=row, column=22, value=kurs_6_jami)
-        ws.cell(row=row, column=23, value=kurs_6_grand_jami)
-        ws.cell(row=row, column=24, value=kurs_6_kontrakt_jami)
+        ws.cell(row=row, column=23, value=kurs_6_erkak_jami)
+        ws.cell(row=row, column=24, value=kurs_6_ayol_jami)
         ws.cell(row=row, column=25, value=kurs_7_jami)
-        ws.cell(row=row, column=26, value=kurs_7_grand_jami)
-        ws.cell(row=row, column=27, value=kurs_7_kontrakt_jami)
+        ws.cell(row=row, column=26, value=kurs_7_erkak_jami)
+        ws.cell(row=row, column=27, value=kurs_7_ayol_jami)
+        row += 1
 
     row += 1
     jami_full = 0
-    jami_uzek = 0
-    jami_rus = 0
     kurs_1_jami = 0
-    kurs_1_grand_jami = 0
-    kurs_1_kontrakt_jami = 0
+    kurs_1_erkak_jami = 0
+    kurs_1_ayol_jami = 0
     kurs_2_jami = 0
-    kurs_2_grand_jami = 0
-    kurs_2_kontrakt_jami = 0
+    kurs_2_erkak_jami = 0
+    kurs_2_ayol_jami = 0
     kurs_3_jami = 0
-    kurs_3_grand_jami = 0
-    kurs_3_kontrakt_jami = 0
+    kurs_3_erkak_jami = 0
+    kurs_3_ayol_jami = 0
     kurs_4_jami = 0
-    kurs_4_grand_jami = 0
-    kurs_4_kontrakt_jami = 0
+    kurs_4_erkak_jami = 0
+    kurs_4_ayol_jami = 0
     kurs_5_jami = 0
-    kurs_5_grand_jami = 0
-    kurs_5_kontrakt_jami = 0
+    kurs_5_erkak_jami = 0
+    kurs_5_ayol_jami = 0
     kurs_6_jami = 0
-    kurs_6_grand_jami = 0
-    kurs_6_kontrakt_jami = 0
+    kurs_6_erkak_jami = 0
+    kurs_6_ayol_jami = 0
     kurs_7_jami = 0
-    kurs_7_grand_jami = 0
-    kurs_7_kontrakt_jami = 0
-    # hamma guruhlarni ol va jamini hisobla
+    kurs_7_erkak_jami = 0
+    kurs_7_ayol_jami = 0
+    jami_full_erkak = 0
+    jami_full_ayol = 0
     guruhs = Guruh.objects.filter(org=org)
+
+    budjet = Guruh.objects.filter(org=org).aggregate(budget=Sum('guruhbudjet__jami'))
+    shartnoma = Guruh.objects.filter(org=org).aggregate(budget=Sum('guruhshartnoma__jami'))
+    budget2 = Guruh.objects.filter(org=org).aggregate(ayollar=Sum('guruhbudjet__xotin_qiz'))
+    budget3 = Guruh.objects.filter(org=org).aggregate(ayollar=Sum('guruhshartnoma__xotin_qiz'))
+    jami = 0
+    jami_ayol = 0
+    jami_erkak = 0
+    if budjet['budget']:
+        jami += budjet['budget']
+        jami_full += budjet['budget']
+        if budget2['ayollar']:
+            jami_ayol += budget2['ayollar']
+            jami_erkak += budjet['budget'] - budget2['ayollar']
+            jami_full_ayol += budget2['ayollar']
+            jami_full_erkak += budjet['budget'] - budget2['ayollar']
+        else:
+            jami_erkak += budjet['budget']
+            jami_full_erkak += budjet['budget']
+    if shartnoma['budget']:
+        jami += shartnoma['budget']
+        jami_full += shartnoma['budget']
+        if budget3['ayollar']:
+            jami_ayol += budget3['ayollar']
+            jami_erkak += shartnoma['budget'] - budget3['ayollar']
+            jami_full_ayol += budget3['ayollar']
+            jami_full_erkak += shartnoma['budget'] - budget3['ayollar']
+        else:
+            jami_erkak += shartnoma['budget']
+            jami_full_erkak += shartnoma['budget']
     for guruh in guruhs:
         jami = 0
+        jami_ayol = 0
+        jami_erkak = 0
         budget = Budjet.objects.filter(guruhi=guruh).aggregate(jami=Sum('jami'))
         shartnoma = Shartnoma.objects.filter(guruh=guruh).aggregate(jami=Sum('jami'))
+        budget2 = Budjet.objects.filter(guruhi=guruh).aggregate(ayollar=Sum('xotin_qiz'))
+        budget3 = Shartnoma.objects.filter(guruh=guruh).aggregate(ayollar=Sum('xotin_qiz'))
+        if budget['jami']:
+            jami += budget['jami']
+            if budget2['ayollar']:
+                jami_ayol += budget2['ayollar']
+                jami_erkak += budget['jami'] - budget2['ayollar']
+            else:
+                jami_erkak += budget['jami']
+                jami_full_erkak += budget['jami']
+        if shartnoma['jami']:
+            jami += shartnoma['jami']
+            if budget3['ayollar']:
+                jami_ayol += budget3['ayollar']
+                jami_erkak += shartnoma['jami'] - budget3['ayollar']
+            else:
+                jami_erkak += shartnoma['jami']
+                jami_full_erkak += shartnoma['jami']
 
-        budget_jami = budget.get('jami', 0)
-        shartnoma_jami = shartnoma.get('jami', 0)
-
-        if budget_jami:
-            jami_uzek += budget_jami
-            jami += budget_jami
-            jami_full += budget_jami
-
-        if shartnoma_jami:
-            jami_rus += shartnoma_jami
-            jami += shartnoma_jami
-            jami_full += shartnoma_jami
-
-        course = guruh.kurs
-
-        if course == 1:
+        if guruh.kurs == 1:
             kurs_1_jami += jami
-            if budget_jami:
-                kurs_1_grand_jami += budget_jami
-            if shartnoma_jami:
-                kurs_1_kontrakt_jami += shartnoma_jami
-        elif course == 2:
+            kurs_1_erkak_jami += jami_erkak
+            kurs_1_ayol_jami += jami_ayol
+        elif guruh.kurs == 2:
             kurs_2_jami += jami
-            if budget_jami:
-                kurs_2_grand_jami += budget_jami
-            if shartnoma_jami:
-                kurs_2_kontrakt_jami += shartnoma_jami
-        elif course == 3:
+            kurs_2_erkak_jami += jami_erkak
+            kurs_2_ayol_jami += jami_ayol
+        elif guruh.kurs == 3:
             kurs_3_jami += jami
-            if budget_jami:
-                kurs_3_grand_jami += budget_jami
-            if shartnoma_jami:
-                kurs_3_kontrakt_jami += shartnoma_jami
-        elif course == 4:
+            kurs_3_erkak_jami += jami_erkak
+            kurs_3_ayol_jami += jami_ayol
+        elif guruh.kurs == 4:
             kurs_4_jami += jami
-            if budget_jami:
-                kurs_4_grand_jami += budget_jami
-            if shartnoma_jami:
-                kurs_4_kontrakt_jami += shartnoma_jami
-        elif course == 5:
+            kurs_4_erkak_jami += jami_erkak
+            kurs_4_ayol_jami += jami_ayol
+        elif guruh.kurs == 5:
             kurs_5_jami += jami
-            if budget_jami:
-                kurs_5_grand_jami += budget_jami
-            if shartnoma_jami:
-                kurs_5_kontrakt_jami += shartnoma_jami
-        elif course == 6:
+            kurs_5_erkak_jami += jami_erkak
+            kurs_5_ayol_jami += jami_ayol
+        elif guruh.kurs == 6:
             kurs_6_jami += jami
-            if budget_jami:
-                kurs_6_grand_jami += budget_jami
-            if shartnoma_jami:
-                kurs_6_kontrakt_jami += shartnoma_jami
+            kurs_6_erkak_jami += jami_erkak
+            kurs_6_ayol_jami += jami_ayol
         else:
             kurs_7_jami += jami
-            if budget_jami:
-                kurs_7_grand_jami += budget_jami
-            if shartnoma_jami:
-                kurs_7_kontrakt_jami += shartnoma_jami
+            kurs_7_erkak_jami += jami_erkak
+            kurs_7_ayol_jami += jami_ayol
 
-    row += 1
-    ws.cell(row=row, column=2, value=f'{fakultet.name}')
+    ws.cell(row=row, column=2, value=f'Jami')
     ws.cell(row=row, column=4, value=jami_full)
-    ws.cell(row=row, column=5, value=jami_uzek)
-    ws.cell(row=row, column=6, value=jami_rus)
+    ws.cell(row=row, column=5, value=jami_full_ayol)
+    ws.cell(row=row, column=6, value=jami_full_erkak)
     ws.cell(row=row, column=7, value=kurs_1_jami)
-    ws.cell(row=row, column=8, value=kurs_1_grand_jami)
-    ws.cell(row=row, column=9, value=kurs_1_kontrakt_jami)
+    ws.cell(row=row, column=8, value=kurs_1_erkak_jami)
+    ws.cell(row=row, column=9, value=kurs_1_ayol_jami)
     ws.cell(row=row, column=10, value=kurs_2_jami)
-    ws.cell(row=row, column=11, value=kurs_2_grand_jami)
-    ws.cell(row=row, column=12, value=kurs_2_kontrakt_jami)
+    ws.cell(row=row, column=11, value=kurs_2_erkak_jami)
+    ws.cell(row=row, column=12, value=kurs_2_ayol_jami)
     ws.cell(row=row, column=13, value=kurs_3_jami)
-    ws.cell(row=row, column=14, value=kurs_3_grand_jami)
-    ws.cell(row=row, column=15, value=kurs_3_kontrakt_jami)
+    ws.cell(row=row, column=14, value=kurs_3_erkak_jami)
+    ws.cell(row=row, column=15, value=kurs_3_ayol_jami)
     ws.cell(row=row, column=16, value=kurs_4_jami)
-    ws.cell(row=row, column=17, value=kurs_4_grand_jami)
-    ws.cell(row=row, column=18, value=kurs_4_kontrakt_jami)
+    ws.cell(row=row, column=17, value=kurs_4_erkak_jami)
+    ws.cell(row=row, column=18, value=kurs_4_ayol_jami)
     ws.cell(row=row, column=19, value=kurs_5_jami)
-    ws.cell(row=row, column=20, value=kurs_5_grand_jami)
-    ws.cell(row=row, column=21, value=kurs_5_kontrakt_jami)
+    ws.cell(row=row, column=20, value=kurs_5_erkak_jami)
+    ws.cell(row=row, column=21, value=kurs_5_ayol_jami)
     ws.cell(row=row, column=22, value=kurs_6_jami)
-    ws.cell(row=row, column=23, value=kurs_6_grand_jami)
-    ws.cell(row=row, column=24, value=kurs_6_kontrakt_jami)
+    ws.cell(row=row, column=23, value=kurs_6_erkak_jami)
+    ws.cell(row=row, column=24, value=kurs_6_ayol_jami)
     ws.cell(row=row, column=25, value=kurs_7_jami)
-    ws.cell(row=row, column=26, value=kurs_7_grand_jami)
-    ws.cell(row=row, column=27, value=kurs_7_kontrakt_jami)
+    ws.cell(row=row, column=26, value=kurs_7_erkak_jami)
+    ws.cell(row=row, column=27, value=kurs_7_ayol_jami)
     row += 1
 
-    wb.save('talabalar.xlsx')
-    output1.seek(0)
+    wb.save(output4)
+    output4.seek(0)
+    return output4
 
 
-exporttoexcel3(org)
+

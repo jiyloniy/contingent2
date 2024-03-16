@@ -40,13 +40,15 @@
                             <div style="padding-right: 12px;">
                                 <button type="button" class="btn btn-primary">Export Exel</button>
                             </div>
-                            {% if perms.user.add_yonalish %}
+                            {% with can_add_yonalish=perms.user.add_yonalish %}
+                                {% if can_add_yonalish %}
                                 <a href="" data-mdb-modal-init data-mdb-target="#exampleModal"
                                    class="btn btn-success float-right"
                                    +>
                                     <i class="fa fa-plus-circle"></i> &nbsp;Add yonalish
                                 </a>
-                            {% endif %}
+                                {% endif %}
+                            {% endwith %}
                         </div>
                     </div>
                 </div>

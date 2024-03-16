@@ -156,28 +156,40 @@ def faculty_delete(request, pk):
         messages.error(request, 'You do not have permission to delete faculty')
         return redirect('dashboard')
 
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.db.models import Prefetch
+
+from .models import Yonalish, Organization, UserOrg
+from .forms import YonalishForm
 
 @login_required(login_url='login')
 def yonalish_list(request):
     form = YonalishForm(user=request.user)
-    if request.user.user_permissions.filter(codename='view_yonalish').exists():
-        if UserOrg.objects.filter(user=request.user).exists():
-            org = UserOrg.objects.get(user=request.user).org
-            yonalish = Yonalish.objects.filter(org=org)
 
-            context = {'yonalishlar': yonalish, 'form': form}
-            return render(request, 'pages/settings.html', context)
-        if Organization.objects.filter(user=request.user).exists():
-            org = Organization.objects.get(user=request.user)
-            yonalish = Yonalish.objects.filter(org=org)
+    if request.user.user_permissions.filter(codename='view_yonalish').exists():
+        org = None
+
+        # Use select_related to fetch related data in a single query
+        user_org = UserOrg.objects.select_related('org').filter(user=request.user).first()
+        if user_org:
+            org = user_org.org
+        else:
+            org = Organization.objects.filter(user=request.user).first()
+
+        if org:
+            # Use prefetch_related to fetch related data in separate queries
+            yonalish = Yonalish.objects.select_related('faculty').prefetch_related(
+                Prefetch('org', queryset=Organization.objects.select_related('user'))
+            ).filter(org=org)
             context = {'yonalishlar': yonalish, 'form': form}
             return render(request, 'pages/settings.html', context)
         else:
             messages.error(request, 'You do not have permission to view yonalish')
             return redirect('empty')
-
-    return redirect('empty')
-
+    else:
+        return redirect('empty')
 
 @login_required(login_url='login')
 def yonalish_create(request):
@@ -235,25 +247,36 @@ def yonalish_delete(request, pk):
         messages.error(request, 'You do not have permission to delete yonalish')
         return redirect('yonalishlar')
 
-
 @login_required(login_url='login')
 def guruh_list(request):
     form = GuruhForm()
     shartmonoma = ShartnomaForm()
     budjet = BudjetForm()
+
     if request.user.user_permissions.filter(codename='view_guruh').exists():
-        if UserOrg.objects.filter(user=request.user).exists():
-            org = UserOrg.objects.get(user=request.user).org
-            guruh = Guruh.objects.filter(org=org)
-            context = {'groups': guruh, 'form': form, 'shartmonoma': shartmonoma, 'budjet': budjet}
-            return render(request, 'pages/tables.html', context)
-        if Organization.objects.filter(user=request.user).exists():
-            org = Organization.objects.get(user=request.user)
-            guruh = Guruh.objects.filter(org=org)
+        org = None
+
+        # Use select_related to fetch related data in a single query
+        user_org = UserOrg.objects.select_related('org').filter(user=request.user).first()
+        if user_org:
+            org = user_org.org
+        else:
+            org = Organization.objects.filter(user=request.user).first()
+
+        if org:
+            # Use prefetch_related to fetch related data in separate queries
+            guruh = Guruh.objects.select_related('yonalish').prefetch_related(
+                Prefetch('org', queryset=Organization.objects.select_related('user'))
+            ).filter(org=org)
             context = {'groups': guruh, 'form': form, 'shartmonoma': shartmonoma, 'budjet': budjet}
             return render(request, 'pages/tables.html', context)
         else:
-            return render(request, 'pages/tables.html', {'form': form, 'shartmonoma': shartmonoma, 'budjet': budjet})
+            messages.error(request, 'Your organization information is missing.')
+            return redirect('empty')
+    else:
+        messages.error(request, 'You do not have permission to view groups')
+        return redirect('empty')
+
     return redirect('empty')
 
 
@@ -351,23 +374,31 @@ def guruh_delete(request, pk):
         messages.error(request, 'You do not have permission to delete guruh')
         return redirect('guruh')
 
-
 @login_required(login_url='login')
 def userlist(request):
     if request.user.user_permissions.filter(codename='view_user').exists():
-        if UserOrg.objects.filter(user=request.user).exists():
-            org = Organization.objects.get(user=request.user)
-            users = UserOrg.objects.filter(org=org)
+        org = None
+
+        # Use select_related to fetch related data in a single query
+        user_org = UserOrg.objects.select_related('user', 'org').filter(user=request.user).first()
+        if user_org:
+            org = user_org.org
+        else:
+            org = Organization.objects.filter(user=request.user).first()
+
+        if org:
+            # Use prefetch_related to fetch related data in separate queries
+            users = UserOrg.objects.prefetch_related(
+                Prefetch('user'),
+                Prefetch('org', queryset=Organization.objects.select_related('user'))
+            ).filter(org=org)
             context = {'users': users}
             return render(request, 'pages/usercreate.html', context)
-        if Organization.objects.filter(user=request.user).exists():
-            org = Organization.objects.get(user=request.user)
-            users = UserOrg.objects.filter(org=org)
-            context = {'users': users}
-            return render(request, 'pages/usercreate.html', context)
-        return render(request, 'pages/usercreate.html')
-    messages.error(request, 'You do not have permission to view user')
-    return redirect('empty')
+        else:
+            return render(request, 'pages/usercreate.html')
+    else:
+        messages.error(request, 'You do not have permission to view user')
+        return redirect('empty')
 
 
 @login_required(login_url='login')

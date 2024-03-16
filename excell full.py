@@ -10,6 +10,7 @@ django.setup()
 from ecxel2 import exporttoexcel
 from exportexcel import exporttoexcell
 from excel3 import exporttoexcel3
+from excel42 import exporttoexcel4
 from user.models import Organization
 
 org = Organization.objects.filter(name='kiuf').first()
@@ -19,7 +20,8 @@ def generate_excel_files(org):
     output1 = exporttoexcell(org)
     output2 = exporttoexcel(org)
     output3 = exporttoexcel3(org)
-    return [output1, output2, output3]
+    output4 = exporttoexcel4(org)
+    return [output1, output2, output3,output4]
 
 
 def copy_cell_style(source_cell, dest_cell):
