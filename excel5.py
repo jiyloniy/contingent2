@@ -19,10 +19,9 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 from user.models import Faculty, Budjet, Shartnoma, Organization, Yonalish, Guruh
 
-org = Organization.objects.filter(name='kiuf').first()
 
 
-def exporttoexcel4(org):
+def exporttoexcel5(org):
     from openpyxl.styles import Alignment, Font, Border, Side
     from openpyxl import Workbook
 
@@ -1302,11 +1301,8 @@ def exporttoexcel4(org):
             ws.cell(row=row, column=27, value=jami_7_kurs_c)
             row += 1
 
+    wb.save(output4)
+    output4.seek(0)
+    return output4
 
 
-
-
-    wb.save('talabalar.xlsx')
-
-
-exporttoexcel4(org)

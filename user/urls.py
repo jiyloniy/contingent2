@@ -2,7 +2,7 @@ from django.urls import path
 
 from user.views import login_view, logout_view, faculty_list, add_faculty, faculty_update, faculty_delete, \
     yonalish_list, yonalish_create, yonalish_update, yonalish_delete, guruh_list, guruh_create, guruh_update, \
-    guruh_delete, userlist, user_create, user_update, emptypage, user_delete
+    guruh_delete, userlist, user_create, user_update, emptypage, user_delete,generateexcel
 
 urlpatterns = [
     path('empty/', emptypage, name='empty'),
@@ -24,5 +24,6 @@ urlpatterns = [
     path('usercreate/', user_create, name='usercreate'),
     path('userupdate/<int:pk>/', user_update, name='userupdate'),
     path('userdelete/<int:pk>/', user_delete, name='userdelete'),
+    path('generateexcel/', generateexcel, name='generateexcel'),
 
 ]

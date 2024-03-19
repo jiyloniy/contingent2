@@ -24,7 +24,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 from user.models import Faculty, Budjet, Shartnoma, Organization, Yonalish, Guruh
 
-org = Organization.objects.filter(name='kiuf').first()
+
 
 def exporttoexcel(org):
     from openpyxl.styles import Alignment, Font, Border, Side, PatternFill
@@ -140,7 +140,7 @@ def exporttoexcel(org):
         yonalishguruh__bosqich='Magistr', turi='Masofaviy')
     magistir = Yonalish.objects.filter(org=org, yonalishguruh__bosqich='Magistr')
 
-    print(mut_2)
+
     kurs_jami = 0
 
     jami_full = 0

@@ -1,3 +1,5 @@
+import os
+
 from django.contrib.sessions.models import Session
 from django.db import transaction
 from django.shortcuts import render
@@ -5,11 +7,14 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
+from django.http import FileResponse
 from django.shortcuts import redirect
 from django.contrib import messages
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
+
+from excelgenerate import generate_excel_files, merge_excel_files
 
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import Permission
@@ -156,6 +161,7 @@ def faculty_delete(request, pk):
         messages.error(request, 'You do not have permission to delete faculty')
         return redirect('dashboard')
 
+
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import render, redirect
@@ -163,6 +169,7 @@ from django.db.models import Prefetch
 
 from .models import Yonalish, Organization, UserOrg
 from .forms import YonalishForm
+
 
 @login_required(login_url='login')
 def yonalish_list(request):
@@ -191,6 +198,7 @@ def yonalish_list(request):
     else:
         return redirect('empty')
 
+
 @login_required(login_url='login')
 def yonalish_create(request):
     if request.user.user_permissions.filter(codename='add_yonalish').exists():
@@ -202,16 +210,18 @@ def yonalish_create(request):
                 faculty = form.cleaned_data.get('faculty')
                 turi = form.cleaned_data.get('turi')
                 language = form.cleaned_data.get('language'),
-                print(language[0],type(language))
+                print(language[0], type(language))
                 code = form.cleaned_data.get('code'),
                 mutahasislik_2 = form.cleaned_data.get('mutahasislik_2')
                 if UserOrg.objects.filter(user=request.user).exists():
                     org = UserOrg.objects.get(user=request.user).org
-                    yonalish = Yonalish(name=name, faculty=faculty, turi=turi, language=language[0], org=org, code=code,mutahasislik_2=mutahasislik_2)
+                    yonalish = Yonalish(name=name, faculty=faculty, turi=turi, language=language[0], org=org, code=code,
+                                        mutahasislik_2=mutahasislik_2)
                     yonalish.save()
                 if Organization.objects.filter(user=request.user).exists():
                     org = Organization.objects.get(user=request.user)
-                    yonalish = Yonalish(name=name, faculty=faculty, turi=turi, language=language, org=org, code=code,mutahasislik_2=mutahasislik_2)
+                    yonalish = Yonalish(name=name, faculty=faculty, turi=turi, language=language, org=org, code=code,
+                                        mutahasislik_2=mutahasislik_2)
                     yonalish.save()
 
         else:
@@ -246,6 +256,7 @@ def yonalish_delete(request, pk):
     else:
         messages.error(request, 'You do not have permission to delete yonalish')
         return redirect('yonalishlar')
+
 
 @login_required(login_url='login')
 def guruh_list(request):
@@ -373,6 +384,7 @@ def guruh_delete(request, pk):
     else:
         messages.error(request, 'You do not have permission to delete guruh')
         return redirect('guruh')
+
 
 @login_required(login_url='login')
 def userlist(request):
@@ -748,3 +760,31 @@ def user_delete(request, pk):
 @login_required(login_url='login')
 def emptypage(request):
     return render(request, 'pages/empty.html')
+
+from django.http import FileResponse
+
+@login_required(login_url='login')
+def generateexcel(request):
+    org = None
+    if UserOrg.objects.filter(user=request.user).exists():
+        org = UserOrg.objects.get(user=request.user).org
+    if Organization.objects.filter(user=request.user).exists():
+        org = Organization.objects.get(user=request.user)
+    if org:
+        if request.method == 'POST':
+            excel_files = generate_excel_files(org)
+
+            # Merge the Excel files
+            merged_output = merge_excel_files(excel_files)
+
+            # Set the response headers
+            response = HttpResponse(merged_output.getvalue(),
+                                    content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = 'attachment; filename=merged_excel.xlsx'
+
+            return response
+        else:
+            return render(request, 'pages/generateexcel.html')
+    else:
+        messages.error(request, 'Your organization information is missing.')
+        return redirect('empty')

@@ -1,0 +1,38 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% block title %}Fakultetlar{% endblock %}
+{% block content %}
+    <!-- Modal -->
+
+
+    <div class="midde_cont">
+        <div class="container-fluid">
+            <div class="row column_title">
+                <div class="col-md-12">
+                    <div class="page_title">
+                        <h2>Eslatma: bu bir necha daqiqani olishi mumkin</h2>
+                        <div class="col-12 col-md-auto d-flex align-items-center justify-content-end page-actions">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- end graph -->
+            <div class="row column3">
+            </div>
+            <!-- end progress bar -->
+        </div>
+        <div class="col-12 grid-margin">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Excel Yuklab olish</h4>
+                    <form action="{% url 'generateexcel'  %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary btn-fw">Excel yuklab olish</button>
+                    </form>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

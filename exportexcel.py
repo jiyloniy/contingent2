@@ -22,7 +22,6 @@ from openpyxl.utils import get_column_letter
 
 organization_name = "Toshkent Davlat Texnnika Universiteti"
 
-org = Organization.objects.filter(name='kiuf').first()
 
 
 

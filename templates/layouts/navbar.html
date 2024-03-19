@@ -28,6 +28,7 @@
 
 
                 <li {% if '/yonalish/' in request.path %} class="actives" {% endif %} ><a href="{% url 'yonalishlar' %}"><i class="fa fa-bars"></i> <span>Yonalishlar</span></a></li>
+                <li {% if '/generateexcel/' in request.path %} class="actives" {% endif %} ><a href="{% url 'generateexcel' %}"><i class="fa fa-bars"></i> <span>generateexcel</span></a></li>
 
                 <li>
                     <div class="dropdown">

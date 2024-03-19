@@ -19,7 +19,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 from user.models import Faculty, Budjet, Shartnoma, Organization, Yonalish, Guruh
 
-org = Organization.objects.filter(name='kiuf').first()
+
 
 
 def exporttoexcel4(org):
@@ -854,7 +854,7 @@ def exporttoexcel4(org):
             row += 1
 
             ws.cell(row=row, column=2, value='2-mut Jami')
-            print(1)
+
             ws.cell(row=row, column=4, value=jami_full)
             ws.cell(row=row, column=5, value=jami_full_ayol)
             ws.cell(row=row, column=6, value=jami_full_erkak)
@@ -1066,8 +1066,8 @@ def exporttoexcel4(org):
             ws.cell(row=row, column=26, value=kurs_7_erkak_jami)
             ws.cell(row=row, column=27, value=kurs_7_ayol_jami)
 
-    wb.save('talabalar.xlsx')
+    wb.save(output1)
     output1.seek(0)
+    return output1
 
 
-exporttoexcel4(org)

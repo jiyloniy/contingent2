@@ -19,7 +19,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 from user.models import Faculty, Budjet, Shartnoma, Organization, Yonalish, Guruh
 
-org = Organization.objects.filter(name='kiuf').first()
+
 
 
 def exporttoexcel4(org):
@@ -136,7 +136,7 @@ def exporttoexcel4(org):
         yonalishguruh__bosqich='Magistr', turi='Masofaviy')
     magistir = Yonalish.objects.filter(org=org, yonalishguruh__bosqich='Magistr')
 
-    print(mut_2)
+
 
     jami_full = 0
     kurs_1_jami = 0
@@ -201,7 +201,7 @@ def exporttoexcel4(org):
             else:
                 jami_erkak += shartnoma['jami']
                 jami_full_erkak += shartnoma['jami']
-        print(jami)
+
         if jami != 0:
             ws.cell(row=row, column=1, value=row - 4)
             ws.cell(row=row, column=2, value=kunduzgi_yonlaish.name)
@@ -394,7 +394,7 @@ def exporttoexcel4(org):
             else:
                 jami_erkak += shartnoma['jami']
                 jami_full_erkak += shartnoma['jami']
-        print(jami)
+
         if jami != 0:
             ws.cell(row=row, column=1, value=row - 4)
             ws.cell(row=row, column=2, value=kunduzgi_yonlaish.name)
@@ -584,7 +584,7 @@ def exporttoexcel4(org):
             else:
                 jami_erkak += shartnoma['jami']
                 jami_full_erkak += shartnoma['jami']
-        print(jami)
+
         if jami != 0:
             ws.cell(row=row, column=1, value=row - 4)
             ws.cell(row=row, column=2, value=kunduzgi_yonlaish.name)
@@ -774,7 +774,7 @@ def exporttoexcel4(org):
             else:
                 jami_erkak += shartnoma['jami']
                 jami_full_erkak += shartnoma['jami']
-        print(jami)
+
         if jami != 0:
             ws.cell(row=row, column=1, value=row - 4)
             ws.cell(row=row, column=2, value=kunduzgi_yonlaish.name)
@@ -1076,7 +1076,7 @@ def exporttoexcel4(org):
             else:
                 jami_erkak += shartnoma['jami']
                 jami_full_erkak += shartnoma['jami']
-        print(jami)
+
         if jami != 0:
             ws.cell(row=row, column=1, value=row - 4)
             ws.cell(row=row, column=2, value=kunduzgi_yonlaish.name)

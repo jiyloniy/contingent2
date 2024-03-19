@@ -11,9 +11,11 @@ from ecxel2 import exporttoexcel
 from exportexcel import exporttoexcell
 from excel3 import exporttoexcel3
 from excel42 import exporttoexcel4
+from excel5 import exporttoexcel5
+from excel6 import exporttoexcel6
 from user.models import Organization
 
-org = Organization.objects.filter(name='kiuf').first()
+
 
 
 def generate_excel_files(org):
@@ -25,7 +27,10 @@ def generate_excel_files(org):
     print(3)
     output4 = exporttoexcel4(org)
     print(4)
-    return [output1, output2, output3,output4]
+    output5 = exporttoexcel5(org)
+    print(5)
+    output6 = exporttoexcel6(org)
+    return [output1, output2, output3, output4, output5, output6]
 
 
 def copy_cell_style(source_cell, dest_cell):
@@ -86,11 +91,7 @@ def merge_excel_files(excel_files):
         for merge_range in merge_cells:
             merged_sheet.merge_cells(merge_range.coord)
 
-    merged_workbook.save('talabalar2.xlsx')
+    # merged_workbook.save('talabalar2.xlsx')
+    merged_workbook.save(merged_output)
+    return merged_output
 
-
-# Generate Excel files
-excel_files = generate_excel_files(org)
-
-# Merge Excel files
-merge_excel_files(excel_files)
