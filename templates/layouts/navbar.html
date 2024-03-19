@@ -26,9 +26,9 @@
                 </li>
                 <li {% if '/guruh/' in request.path %} class="actives" {% endif %}><a href="{% url 'guruh' %}"><i class="fa fa-users"></i> <span>Groups</span></a></li>
 
-                {% if perms.auth.can_view_user %}
+
                 <li {% if '/yonalish/' in request.path %} class="actives" {% endif %} ><a href="{% url 'yonalishlar' %}"><i class="fa fa-bars"></i> <span>Yonalishlar</span></a></li>
-                {% endif %}
+
                 <li>
                     <div class="dropdown">
                         <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown"

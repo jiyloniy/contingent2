@@ -18,9 +18,13 @@ org = Organization.objects.filter(name='kiuf').first()
 
 def generate_excel_files(org):
     output1 = exporttoexcell(org)
+    print(1)
     output2 = exporttoexcel(org)
+    print(2)
     output3 = exporttoexcel3(org)
+    print(3)
     output4 = exporttoexcel4(org)
+    print(4)
     return [output1, output2, output3,output4]
 
 

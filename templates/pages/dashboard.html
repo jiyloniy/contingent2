@@ -39,9 +39,7 @@
                     <div class="page_title">
                         <h2>Fakultetlar</h2>
                         <div class="col-12 col-md-auto d-flex align-items-center justify-content-end page-actions">
-                            <div style="padding-right: 12px;">
-                                <button type="button" class="btn btn-primary">Export Exel</button>
-                            </div>
+
                             {% if perms.user.add_faculty %}
 
                                 <a href="" class="btn btn-success float-right" +
@@ -58,12 +56,13 @@
             </div>
             <!-- end progress bar -->
         </div>
+
         <div class="col-12 grid-margin">
             <div class="card">
                 <div class="card-body">
                     <h4 class="card-title">Fakultet</h4>
                     <div class="table-responsive">
-                        <table class="table">
+                        <table class="table" id="paginationTable">
                             <thead>
                             <tr>
                                 <th>
@@ -111,8 +110,18 @@
                                     </td>
                                 </tr>
 
-                            {% endfor %}
+                            {% empty %}
+                                <div class="col-12 grid-margin">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h4 class="card-title">Fakultetlar mamjud emas</h4>
+                                            <div class="table-responsive">
 
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
 
                             </tbody>
                         </table>
@@ -120,20 +129,11 @@
                 </div>
             </div>
         </div>
-        <div class="col-12 grid-margin">
-            <div class="card">
-                <div class="card-body">
-                    <h4 class="card-title">Fakultetlar mamjud emas</h4>
-                    <div class="table-responsive">
 
-                    </div>
-                </div>
-            </div>
-        </div>
 
     </div>
     <script>
-{#       write alert for delete faculty#}
+        {#       write alert for delete faculty#}
         $('.delete-button').click(function () {
             var id = $(this).data('id');
             var url = "{% url 'facultydelete' 0 %}".replace('0', id);

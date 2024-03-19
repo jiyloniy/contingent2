@@ -131,208 +131,1182 @@ def exporttoexcel4(org):
         xullas  menga shunday qilish kerak oldin facultetlarni oladi va xar bir fakultet bo'yicha yo'nlasihlarni filtert qiladi bu filter Kunduzgi Sirtqi Masofaviy Magistr Doktorant mutahasislik_2=True bo'yicha bo'ladi bu yo'nalsihlar tugagandan keyin har bir filter bo'yicha jamini hsipb;ash kerak undan song har bir yo'nalishga bo'glangan guruhlarlarni oladi guruhlar kurslar kesimi bo'yicha filter qilinadi masalan 1- kurs bo'lgan hamma guruh 2- kurs bo'lgan hamma guruhlarni oladi hisoblaydi davlat grandi Budget modelidagi jami ga teng Shartnoma esa Shartnoma jami ga teng jami 2 tasini yig'indisaga teng bo'ladi har bir fakultet tugagandan keyin 
         '''
         row = 5
+
+        jami2_full = 0
+        jami2_b = 0
+        jami2_c = 0
+        jami2_1_kurs = 0
+        jami2_1_kurs_b = 0
+        jami2_1_kurs_c = 0
+        jami2_2_kurs = 0
+        jami2_2_kurs_b = 0
+        jami2_2_kurs_c = 0
+        jami2_3_kurs = 0
+        jami2_3_kurs_b = 0
+        jami2_3_kurs_c = 0
+        jami2_4_kurs = 0
+        jami2_4_kurs_b = 0
+        jami2_4_kurs_c = 0
+        jami2_5_kurs = 0
+        jami2_5_kurs_b = 0
+        jami2_5_kurs_c = 0
+        jami2_6_kurs = 0
+        jami2_6_kurs_b = 0
+        jami2_6_kurs_c = 0
+        jami2_7_kurs = 0
+        jami2_7_kurs_b = 0
+        jami2_7_kurs_c = 0
         for f in faculty:
-            jami = 0
-            jami_d = 0
-            jami_c = 0
-
-            yonalish_kunduzgi = Yonalish.objects.filter(faculty=f, turi='Kunduzgi').distinct()
-            yonalish_Sirtqi = Yonalish.objects.filter(faculty=f, turi='Sirtqi').distinct()
-            yonalish_Masofaviy = Yonalish.objects.filter(faculty=f, turi='Masofaviy').distinct()
-            yonalish_Magistratura = Yonalish.objects.filter(faculty=f, yonalishguruh__bosqich='Magistr').distinct()
-            yonalish_Doktorantura = Yonalish.objects.filter(faculty=f, yonalishguruh__bosqich='Doktorant').distinct()
-            yonalish_ikkinchi_talim = Yonalish.objects.filter(faculty=f, mutahasislik_2=True).distinct()
-            yonalish_list = [yonalish_kunduzgi, yonalish_Sirtqi, yonalish_Masofaviy, yonalish_Magistratura,
-                             yonalish_Doktorantura, yonalish_ikkinchi_talim]
             jami_full = 0
-            jami_uzek = 0
-            jami_rus = 0
-            kurs_1_jami = 0
-            kurs_1_grand_jami = 0
-            kurs_1_kontrakt_jami = 0
-            kurs_2_jami = 0
-            kurs_2_grand_jami = 0
-            kurs_2_kontrakt_jami = 0
-            kurs_3_jami = 0
-            kurs_3_grand_jami = 0
-            kurs_3_kontrakt_jami = 0
-            kurs_4_jami = 0
-            kurs_4_grand_jami = 0
-            kurs_4_kontrakt_jami = 0
-            kurs_5_jami = 0
-            kurs_5_grand_jami = 0
-            kurs_5_kontrakt_jami = 0
-            kurs_6_jami = 0
-            kurs_6_grand_jami = 0
-            kurs_6_kontrakt_jami = 0
-            kurs_7_jami = 0
-            kurs_7_grand_jami = 0
-            kurs_7_kontrakt_jami = 0
+            jami_b = 0
+            jami_c = 0
+            jami_1_kurs = 0
+            jami_1_kurs_b = 0
+            jami_1_kurs_c = 0
+            jami_2_kurs = 0
+            jami_2_kurs_b = 0
+            jami_2_kurs_c = 0
+            jami_3_kurs = 0
+            jami_3_kurs_b = 0
+            jami_3_kurs_c = 0
+            jami_4_kurs = 0
+            jami_4_kurs_b = 0
+            jami_4_kurs_c = 0
+            jami_5_kurs = 0
+            jami_5_kurs_b = 0
+            jami_5_kurs_c = 0
+            jami_6_kurs = 0
+            jami_6_kurs_b = 0
+            jami_6_kurs_c = 0
+            jami_7_kurs = 0
+            jami_7_kurs_b = 0
+            jami_7_kurs_c = 0
 
-            row = 5
-            for kunduzgi_yonlaish in yonalish_list:
+            yonalish_kunduzgi = Yonalish.objects.filter(faculty=f, turi='Kunduzgi').exclude(yonalishguruh__bosqich='Magistr').exclude(
+                yonalishguruh__bosqich='Doktorant')
+            yonalish_Sirtqi = Yonalish.objects.filter(faculty=f, turi='Sirtqi')
+            yonalish_Masofaviy = Yonalish.objects.filter(faculty=f, turi='Masofaviy')
+            yonalish_Magistratura = Yonalish.objects.filter(faculty=f, yonalishguruh__bosqich='Magistr')
+            yonalish_Doktorantura = Yonalish.objects.filter(faculty=f, yonalishguruh__bosqich='Doktorant')
+            yonalish_ikkinchi_talim = Yonalish.objects.filter(faculty=f, mutahasislik_2=True)
+
+            for y in yonalish_kunduzgi:
+
                 jami = 0
-                ours_set = Guruh.objects.filter(org=org, yonalish__in=kunduzgi_yonlaish).values_list('kurs',flat=True)
-                budget = Guruh.objects.filter(org=org, yonalish=kunduzgi_yonlaish).aggregate(
-                    jami=Sum('guruhbudjet__jami'))
-                shartnoma = Guruh.objects.filter(org=org, yonalish=kunduzgi_yonlaish).aggregate(
-                    jami=Sum('guruhshartnoma__jami'))
+                jami_b = 0
+                jami_c = 0
+                yonalish_jami_1_kurs = 0
+                yonalish_jami_1_kurs_b = 0
+                yonalish_jami_1_kurs_c = 0
+                yonalish_jami_2_kurs = 0
+                yonalish_jami_2_kurs_b = 0
+                yonalish_jami_2_kurs_c = 0
+                yonalish_jami_3_kurs = 0
+                yonalish_jami_3_kurs_b = 0
+                yonalish_jami_3_kurs_c = 0
+                yonalish_jami_4_kurs = 0
+                yonalish_jami_4_kurs_b = 0
+                yonalish_jami_4_kurs_c = 0
+                yonalish_jami_5_kurs = 0
+                yonalish_jami_5_kurs_b = 0
+                yonalish_jami_5_kurs_c = 0
+                yonalish_jami_6_kurs = 0
+                yonalish_jami_6_kurs_b = 0
+                yonalish_jami_6_kurs_c = 0
+                yonalish_jami_7_kurs = 0
+                yonalish_jami_7_kurs_b = 0
+                yonalish_jami_7_kurs_c = 0
+                guruhs = Guruh.objects.filter(org=org, yonalish=y, yonalish__faculty=f)
+                for g in guruhs:
 
-                if budget['jami']:
-                    jami_uzek += budget['jami']
-                    jami += budget['jami']
-                    jami_full += budget['jami']
-                if shartnoma['jami']:
-                    jami_rus += shartnoma['jami']
-                    jami += shartnoma['jami']
-                    jami_full += shartnoma['jami']
+                    budjet = Budjet.objects.filter(guruhi=g).aggregate(Sum('jami'))
+                    shartnoma = Shartnoma.objects.filter(guruh=g).aggregate(Sum('jami'))
+                    if budjet['jami__sum']:
+                        jami_full += budjet['jami__sum']
+                        jami2_full += budjet['jami__sum']
+                        jami2_b += budjet['jami__sum']
+                        jami += budjet['jami__sum']
+                        jami_b += budjet['jami__sum']
+                        jami2_b += budjet['jami__sum']
+
+                    if shartnoma['jami__sum']:
+                        jami_full += shartnoma['jami__sum']
+                        jami2_full += shartnoma['jami__sum']
+                        jami2_c += shartnoma['jami__sum']
+                        jami += shartnoma['jami__sum']
+                        jami_c += shartnoma['jami__sum']
+                        jami2_c += shartnoma['jami__sum']
+                    if jami != 0:
+                        if g.kurs == 1:
+                            if budjet['jami__sum']:
+                                jami_1_kurs += budjet['jami__sum']
+                                jami2_1_kurs += budjet['jami__sum']
+                                jami2_1_kurs_b += budjet['jami__sum']
+                                jami_1_kurs_b += budjet['jami__sum']
+                                yonalish_jami_1_kurs += budjet['jami__sum']
+                                yonalish_jami_1_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_1_kurs += shartnoma['jami__sum']
+                                jami2_1_kurs += shartnoma['jami__sum']
+                                jami2_1_kurs_c += shartnoma['jami__sum']
+                                jami_1_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_1_kurs += shartnoma['jami__sum']
+                                yonalish_jami_1_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 2:
+                            if budjet['jami__sum']:
+                                jami_2_kurs += budjet['jami__sum']
+                                jami2_2_kurs += budjet['jami__sum']
+                                jami2_2_kurs_b += budjet['jami__sum']
+                                jami_2_kurs_b += budjet['jami__sum']
+                                yonalish_jami_2_kurs += budjet['jami__sum']
+                                yonalish_jami_2_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_2_kurs += shartnoma['jami__sum']
+                                jami2_2_kurs += shartnoma['jami__sum']
+                                jami2_2_kurs_c += shartnoma['jami__sum']
+                                jami_2_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_2_kurs += shartnoma['jami__sum']
+                                yonalish_jami_2_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 3:
+                            if budjet['jami__sum']:
+                                jami_3_kurs += budjet['jami__sum']
+                                jami2_3_kurs += budjet['jami__sum']
+                                jami2_3_kurs_b += budjet['jami__sum']
+                                jami_3_kurs_b += budjet['jami__sum']
+                                yonalish_jami_3_kurs += budjet['jami__sum']
+                                yonalish_jami_3_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_3_kurs += shartnoma['jami__sum']
+                                jami_3_kurs_c += shartnoma['jami__sum']
+                                jami2_3_kurs += shartnoma['jami__sum']
+                                jami2_3_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_3_kurs += shartnoma['jami__sum']
+                                yonalish_jami_3_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 4:
+                            if budjet['jami__sum']:
+                                jami_4_kurs += budjet['jami__sum']
+                                jami_4_kurs_b += budjet['jami__sum']
+                                jami2_4_kurs += budjet['jami__sum']
+                                jami2_4_kurs_b += budjet['jami__sum']
+                                yonalish_jami_4_kurs += budjet['jami__sum']
+                                yonalish_jami_4_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_4_kurs += shartnoma['jami__sum']
+                                jami2_4_kurs += shartnoma['jami__sum']
+                                jami2_4_kurs_c += shartnoma['jami__sum']
+                                jami_4_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_4_kurs += shartnoma['jami__sum']
+                                yonalish_jami_4_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 5:
+                            if budjet['jami__sum']:
+                                jami_5_kurs += budjet['jami__sum']
+                                jami2_5_kurs += budjet['jami__sum']
+                                jami2_5_kurs_b += budjet['jami__sum']
+                                jami_5_kurs_b += budjet['jami__sum']
+                                yonalish_jami_5_kurs += budjet['jami__sum']
+                                yonalish_jami_5_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_5_kurs += shartnoma['jami__sum']
+                                jami_5_kurs_c += shartnoma['jami__sum']
+                                jami2_5_kurs += shartnoma['jami__sum']
+                                jami2_5_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_5_kurs += shartnoma['jami__sum']
+                                yonalish_jami_5_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 6:
+                            if budjet['jami__sum']:
+                                jami_6_kurs += budjet['jami__sum']
+                                jami_6_kurs_b += budjet['jami__sum']
+                                jami2_6_kurs += budjet['jami__sum']
+                                jami2_6_kurs_b += budjet['jami__sum']
+                                yonalish_jami_6_kurs += budjet['jami__sum']
+                                yonalish_jami_6_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_6_kurs += shartnoma['jami__sum']
+                                jami2_6_kurs += shartnoma['jami__sum']
+                                jami2_6_kurs_c += shartnoma['jami__sum']
+                                jami_6_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_6_kurs += shartnoma['jami__sum']
+                                yonalish_jami_6_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 7:
+                            if budjet['jami__sum']:
+                                jami_7_kurs += budjet['jami__sum']
+                                jami2_7_kurs += budjet['jami__sum']
+                                jami_7_kurs_b += budjet['jami__sum']
+                                yonalish_jami_7_kurs += budjet['jami__sum']
+                                yonalish_jami_7_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_7_kurs += shartnoma['jami__sum']
+                                jami2_7_kurs += shartnoma['jami__sum']
+                                jami_7_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_7_kurs += shartnoma['jami__sum']
+                                yonalish_jami_7_kurs_c += shartnoma['jami__sum']
+
+
                 if jami != 0:
-                    ws.cell(row=row, column=1, value=row - 4)
-                    ws.cell(row=row, column=2, value=kunduzgi_yonlaish.name)
-                    ws.cell(row=row, column=3, value=kunduzgi_yonlaish.turi)
+                    ws.cell(row=row, column=2, value=y.name)
+                    ws.cell(row=row, column=3, value=y.turi)
                     ws.cell(row=row, column=4, value=jami)
-
-                    ws.cell(row=row, column=5, value=(budget['jami'] or 0))
-                    ws.cell(row=row, column=6, value=(shartnoma['jami'] or 0))
-
-                    for k in [1, 2, 3, 4, 5, 6]:  # Iterate over predefined course values
-                        if k in ours_set:
-                            grand_jami = 0
-                            shartnoma_jami = 0
-                            jami = 0
-                            budget = Budjet.objects.filter(guruhi__org=org, guruhi__yonalish=kunduzgi_yonlaish,
-                                                           guruhi__kurs=k).aggregate(jami=Sum('jami'))
-                            shartnoma = Shartnoma.objects.filter(guruh__org=org, guruh__yonalish=kunduzgi_yonlaish,
-                                                                 guruh__kurs=k).aggregate(jami=Sum('jami'))
-                            if budget['jami']:
-                                grand_jami += budget['jami']
-                                jami += budget['jami']
-                            if shartnoma['jami']:
-                                shartnoma_jami += shartnoma['jami']
-                                jami += shartnoma['jami']
-
-                            if k == 1:
-
-                                ws.cell(row=row, column=7, value=jami)
-                                ws.cell(row=row, column=8, value=grand_jami)
-                                ws.cell(row=row, column=9, value=shartnoma_jami)
-                                kurs_1_jami += jami
-                                kurs_1_grand_jami += grand_jami
-                                kurs_1_kontrakt_jami += shartnoma_jami
-
-                            elif k == 2:
-                                ws.cell(row=row, column=10, value=jami)
-                                ws.cell(row=row, column=11, value=grand_jami)
-                                ws.cell(row=row, column=12, value=shartnoma_jami)
-                                kurs_2_jami += jami
-                                kurs_2_grand_jami += grand_jami
-                                kurs_2_kontrakt_jami += shartnoma_jami
-
-                            elif k == 3:
-
-                                ws.cell(row=row, column=13, value=jami)
-                                ws.cell(row=row, column=14, value=grand_jami)
-                                ws.cell(row=row, column=15, value=shartnoma_jami)
-                                kurs_3_jami += jami
-                                kurs_3_grand_jami += grand_jami
-                                kurs_3_kontrakt_jami += shartnoma_jami
-
-                            elif k == 4:
-
-                                ws.cell(row=row, column=16, value=jami)
-                                ws.cell(row=row, column=17, value=grand_jami)
-                                ws.cell(row=row, column=18, value=shartnoma_jami)
-                                kurs_4_jami += jami
-                                kurs_4_grand_jami += grand_jami
-                                kurs_4_kontrakt_jami += shartnoma_jami
-
-                            elif k == 5:
-
-                                ws.cell(row=row, column=19, value=jami)
-                                ws.cell(row=row, column=20, value=grand_jami)
-                                ws.cell(row=row, column=21, value=shartnoma_jami)
-                                kurs_5_jami += jami
-                                kurs_5_grand_jami += grand_jami
-                                kurs_5_kontrakt_jami += shartnoma_jami
-
-
-                            elif k == 6:
-
-                                ws.cell(row=row, column=22, value=jami)
-                                ws.cell(row=row, column=23, value=grand_jami)
-                                ws.cell(row=row, column=24, value=shartnoma_jami)
-                                kurs_6_jami += jami
-                                kurs_6_grand_jami += grand_jami
-                                kurs_6_kontrakt_jami += shartnoma_jami
-
-                            else:
-                                ws.cell(row=row, column=25, value=jami)
-                                ws.cell(row=row, column=26, value=grand_jami)
-                                ws.cell(row=row, column=27, value=shartnoma_jami)
-                                kurs_7_jami += jami
-                                kurs_7_grand_jami += grand_jami
-                                kurs_7_kontrakt_jami += shartnoma_jami
-                        else:
-                            # Handle missing course data
-                            ws.cell(row=row, column=7 + (k - 1) * 3, value=0)
-                            ws.cell(row=row, column=8 + (k - 1) * 3, value=0)
-                            ws.cell(row=row, column=9 + (k - 1) * 3, value=0)
-
+                    ws.cell(row=row, column=5, value=jami_b)
+                    ws.cell(row=row, column=6, value=jami_c)
+                    ws.cell(row=row, column=7, value=yonalish_jami_1_kurs)
+                    ws.cell(row=row, column=8, value=yonalish_jami_1_kurs_b)
+                    ws.cell(row=row, column=9, value=yonalish_jami_1_kurs_c)
+                    ws.cell(row=row, column=10, value=yonalish_jami_2_kurs)
+                    ws.cell(row=row, column=11, value=yonalish_jami_2_kurs_b)
+                    ws.cell(row=row, column=12, value=yonalish_jami_2_kurs_c)
+                    ws.cell(row=row, column=13, value=yonalish_jami_3_kurs)
+                    ws.cell(row=row, column=14, value=yonalish_jami_3_kurs_b)
+                    ws.cell(row=row, column=15, value=yonalish_jami_3_kurs_c)
+                    ws.cell(row=row, column=16, value=yonalish_jami_4_kurs)
+                    ws.cell(row=row, column=17, value=yonalish_jami_4_kurs_b)
+                    ws.cell(row=row, column=18, value=yonalish_jami_4_kurs_c)
+                    ws.cell(row=row, column=19, value=yonalish_jami_5_kurs)
+                    ws.cell(row=row, column=20, value=yonalish_jami_5_kurs_b)
+                    ws.cell(row=row, column=21, value=yonalish_jami_5_kurs_c)
+                    ws.cell(row=row, column=22, value=yonalish_jami_6_kurs)
+                    ws.cell(row=row, column=23, value=yonalish_jami_6_kurs_b)
+                    ws.cell(row=row, column=24, value=yonalish_jami_6_kurs_c)
+                    ws.cell(row=row, column=25, value=yonalish_jami_7_kurs)
+                    ws.cell(row=row, column=26, value=yonalish_jami_7_kurs_b)
+                    ws.cell(row=row, column=27, value=yonalish_jami_7_kurs_c)
                     row += 1
+            for y in yonalish_Magistratura:
 
-                    ws.cell(row=row, column=2, value='Kunduzgi Jami')
-                    ws.cell(row=row, column=4, value=jami_full)
-                    ws.cell(row=row, column=5, value=jami_uzek)
-                    ws.cell(row=row, column=6, value=jami_rus)
-                    ws.cell(row=row, column=7, value=kurs_1_jami)
-                    ws.cell(row=row, column=8, value=kurs_1_grand_jami)
-                    ws.cell(row=row, column=9, value=kurs_1_kontrakt_jami)
-                    ws.cell(row=row, column=10, value=kurs_2_jami)
-                    ws.cell(row=row, column=11, value=kurs_2_grand_jami)
-                    ws.cell(row=row, column=12, value=kurs_2_kontrakt_jami)
-                    ws.cell(row=row, column=13, value=kurs_3_jami)
-                    ws.cell(row=row, column=14, value=kurs_3_grand_jami)
-                    ws.cell(row=row, column=15, value=kurs_3_kontrakt_jami)
-                    ws.cell(row=row, column=16, value=kurs_4_jami)
-                    ws.cell(row=row, column=17, value=kurs_4_grand_jami)
-                    ws.cell(row=row, column=18, value=kurs_4_kontrakt_jami)
-                    ws.cell(row=row, column=19, value=kurs_5_jami)
-                    ws.cell(row=row, column=20, value=kurs_5_grand_jami)
-                    ws.cell(row=row, column=21, value=kurs_5_kontrakt_jami)
-                    ws.cell(row=row, column=22, value=kurs_6_jami)
-                    ws.cell(row=row, column=23, value=kurs_6_grand_jami)
-                    ws.cell(row=row, column=24, value=kurs_6_kontrakt_jami)
-                    ws.cell(row=row, column=25, value=kurs_7_jami)
-                    ws.cell(row=row, column=26, value=kurs_7_grand_jami)
-                    ws.cell(row=row, column=27, value=kurs_7_kontrakt_jami)
+                jami = 0
+                jami_b = 0
+                jami_c = 0
+                yonalish_jami_1_kurs = 0
+                yonalish_jami_1_kurs_b = 0
+                yonalish_jami_1_kurs_c = 0
+                yonalish_jami_2_kurs = 0
+                yonalish_jami_2_kurs_b = 0
+                yonalish_jami_2_kurs_c = 0
+                yonalish_jami_3_kurs = 0
+                yonalish_jami_3_kurs_b = 0
+                yonalish_jami_3_kurs_c = 0
+                yonalish_jami_4_kurs = 0
+                yonalish_jami_4_kurs_b = 0
+                yonalish_jami_4_kurs_c = 0
+                yonalish_jami_5_kurs = 0
+                yonalish_jami_5_kurs_b = 0
+                yonalish_jami_5_kurs_c = 0
+                yonalish_jami_6_kurs = 0
+                yonalish_jami_6_kurs_b = 0
+                yonalish_jami_6_kurs_c = 0
+                yonalish_jami_7_kurs = 0
+                yonalish_jami_7_kurs_b = 0
+                yonalish_jami_7_kurs_c = 0
+                guruhs = Guruh.objects.filter(org=org, yonalish=y, yonalish__faculty=f)
+                for g in guruhs:
+
+                    budjet = Budjet.objects.filter(guruhi=g).aggregate(Sum('jami'))
+                    shartnoma = Shartnoma.objects.filter(guruh=g).aggregate(Sum('jami'))
+                    if budjet['jami__sum']:
+                        jami_full += budjet['jami__sum']
+                        jami2_full += budjet['jami__sum']
+                        jami2_b += budjet['jami__sum']
+                        jami += budjet['jami__sum']
+                        jami_b += budjet['jami__sum']
+                        jami2_b += budjet['jami__sum']
+
+                    if shartnoma['jami__sum']:
+                        jami_full += shartnoma['jami__sum']
+                        jami2_full += shartnoma['jami__sum']
+                        jami2_c += shartnoma['jami__sum']
+                        jami += shartnoma['jami__sum']
+                        jami_c += shartnoma['jami__sum']
+                        jami2_c += shartnoma['jami__sum']
+                    if jami != 0:
+                        if g.kurs == 1:
+                            if budjet['jami__sum']:
+                                jami_1_kurs += budjet['jami__sum']
+                                jami2_1_kurs += budjet['jami__sum']
+                                jami2_1_kurs_b += budjet['jami__sum']
+                                jami_1_kurs_b += budjet['jami__sum']
+                                yonalish_jami_1_kurs += budjet['jami__sum']
+                                yonalish_jami_1_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_1_kurs += shartnoma['jami__sum']
+                                jami2_1_kurs += shartnoma['jami__sum']
+                                jami2_1_kurs_c += shartnoma['jami__sum']
+                                jami_1_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_1_kurs += shartnoma['jami__sum']
+                                yonalish_jami_1_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 2:
+                            if budjet['jami__sum']:
+                                jami_2_kurs += budjet['jami__sum']
+                                jami2_2_kurs += budjet['jami__sum']
+                                jami2_2_kurs_b += budjet['jami__sum']
+                                jami_2_kurs_b += budjet['jami__sum']
+                                yonalish_jami_2_kurs += budjet['jami__sum']
+                                yonalish_jami_2_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_2_kurs += shartnoma['jami__sum']
+                                jami2_2_kurs += shartnoma['jami__sum']
+                                jami2_2_kurs_c += shartnoma['jami__sum']
+                                jami_2_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_2_kurs += shartnoma['jami__sum']
+                                yonalish_jami_2_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 3:
+                            if budjet['jami__sum']:
+                                jami_3_kurs += budjet['jami__sum']
+                                jami2_3_kurs += budjet['jami__sum']
+                                jami2_3_kurs_b += budjet['jami__sum']
+                                jami_3_kurs_b += budjet['jami__sum']
+                                yonalish_jami_3_kurs += budjet['jami__sum']
+                                yonalish_jami_3_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_3_kurs += shartnoma['jami__sum']
+                                jami_3_kurs_c += shartnoma['jami__sum']
+                                jami2_3_kurs += shartnoma['jami__sum']
+                                jami2_3_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_3_kurs += shartnoma['jami__sum']
+                                yonalish_jami_3_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 4:
+                            if budjet['jami__sum']:
+                                jami_4_kurs += budjet['jami__sum']
+                                jami_4_kurs_b += budjet['jami__sum']
+                                jami2_4_kurs += budjet['jami__sum']
+                                jami2_4_kurs_b += budjet['jami__sum']
+                                yonalish_jami_4_kurs += budjet['jami__sum']
+                                yonalish_jami_4_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_4_kurs += shartnoma['jami__sum']
+                                jami2_4_kurs += shartnoma['jami__sum']
+                                jami2_4_kurs_c += shartnoma['jami__sum']
+                                jami_4_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_4_kurs += shartnoma['jami__sum']
+                                yonalish_jami_4_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 5:
+                            if budjet['jami__sum']:
+                                jami_5_kurs += budjet['jami__sum']
+                                jami2_5_kurs += budjet['jami__sum']
+                                jami2_5_kurs_b += budjet['jami__sum']
+                                jami_5_kurs_b += budjet['jami__sum']
+                                yonalish_jami_5_kurs += budjet['jami__sum']
+                                yonalish_jami_5_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_5_kurs += shartnoma['jami__sum']
+                                jami_5_kurs_c += shartnoma['jami__sum']
+                                jami2_5_kurs += shartnoma['jami__sum']
+                                jami2_5_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_5_kurs += shartnoma['jami__sum']
+                                yonalish_jami_5_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 6:
+                            if budjet['jami__sum']:
+                                jami_6_kurs += budjet['jami__sum']
+                                jami_6_kurs_b += budjet['jami__sum']
+                                jami2_6_kurs += budjet['jami__sum']
+                                jami2_6_kurs_b += budjet['jami__sum']
+                                yonalish_jami_6_kurs += budjet['jami__sum']
+                                yonalish_jami_6_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_6_kurs += shartnoma['jami__sum']
+                                jami2_6_kurs += shartnoma['jami__sum']
+                                jami2_6_kurs_c += shartnoma['jami__sum']
+                                jami_6_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_6_kurs += shartnoma['jami__sum']
+                                yonalish_jami_6_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 7:
+                            if budjet['jami__sum']:
+                                jami_7_kurs += budjet['jami__sum']
+                                jami2_7_kurs += budjet['jami__sum']
+                                jami_7_kurs_b += budjet['jami__sum']
+                                yonalish_jami_7_kurs += budjet['jami__sum']
+                                yonalish_jami_7_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_7_kurs += shartnoma['jami__sum']
+                                jami2_7_kurs += shartnoma['jami__sum']
+                                jami_7_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_7_kurs += shartnoma['jami__sum']
+                                yonalish_jami_7_kurs_c += shartnoma['jami__sum']
+
+
+                if jami != 0:
+                    ws.cell(row=row, column=2, value=y.name)
+                    ws.cell(row=row, column=3, value='Magistir')
+                    ws.cell(row=row, column=4, value=jami)
+                    ws.cell(row=row, column=5, value=jami_b)
+                    ws.cell(row=row, column=6, value=jami_c)
+                    ws.cell(row=row, column=7, value=yonalish_jami_1_kurs)
+                    ws.cell(row=row, column=8, value=yonalish_jami_1_kurs_b)
+                    ws.cell(row=row, column=9, value=yonalish_jami_1_kurs_c)
+                    ws.cell(row=row, column=10, value=yonalish_jami_2_kurs)
+                    ws.cell(row=row, column=11, value=yonalish_jami_2_kurs_b)
+                    ws.cell(row=row, column=12, value=yonalish_jami_2_kurs_c)
+                    ws.cell(row=row, column=13, value=yonalish_jami_3_kurs)
+                    ws.cell(row=row, column=14, value=yonalish_jami_3_kurs_b)
+                    ws.cell(row=row, column=15, value=yonalish_jami_3_kurs_c)
+                    ws.cell(row=row, column=16, value=yonalish_jami_4_kurs)
+                    ws.cell(row=row, column=17, value=yonalish_jami_4_kurs_b)
+                    ws.cell(row=row, column=18, value=yonalish_jami_4_kurs_c)
+                    ws.cell(row=row, column=19, value=yonalish_jami_5_kurs)
+                    ws.cell(row=row, column=20, value=yonalish_jami_5_kurs_b)
+                    ws.cell(row=row, column=21, value=yonalish_jami_5_kurs_c)
+                    ws.cell(row=row, column=22, value=yonalish_jami_6_kurs)
+                    ws.cell(row=row, column=23, value=yonalish_jami_6_kurs_b)
+                    ws.cell(row=row, column=24, value=yonalish_jami_6_kurs_c)
+                    ws.cell(row=row, column=25, value=yonalish_jami_7_kurs)
+                    ws.cell(row=row, column=26, value=yonalish_jami_7_kurs_b)
+                    ws.cell(row=row, column=27, value=yonalish_jami_7_kurs_c)
                     row += 1
-            ws.cell(row=row, column=2, value='Fakultet Jami')
-            ws.cell(row=row, column=4, value=jami_full)
-            ws.cell(row=row, column=5, value=jami_uzek)
-            ws.cell(row=row, column=6, value=jami_rus)
-            ws.cell(row=row, column=7, value=kurs_1_jami)
-            ws.cell(row=row, column=8, value=kurs_1_grand_jami)
-            ws.cell(row=row, column=9, value=kurs_1_kontrakt_jami)
-            ws.cell(row=row, column=10, value=kurs_2_jami)
-            ws.cell(row=row, column=11, value=kurs_2_grand_jami)
-            ws.cell(row=row, column=12, value=kurs_2_kontrakt_jami)
-            ws.cell(row=row, column=13, value=kurs_3_jami)
-            ws.cell(row=row, column=14, value=kurs_3_grand_jami)
-            ws.cell(row=row, column=15, value=kurs_3_kontrakt_jami)
-            ws.cell(row=row, column=16, value=kurs_4_jami)
-            ws.cell(row=row, column=17, value=kurs_4_grand_jami)
-            ws.cell(row=row, column=18, value=kurs_4_kontrakt_jami)
-            ws.cell(row=row, column=19, value=kurs_5_jami)
-            ws.cell(row=row, column=20, value=kurs_5_grand_jami)
-            ws.cell(row=row, column=21, value=kurs_5_kontrakt_jami)
-            ws.cell(row=row, column=22, value=kurs_6_jami)
-            ws.cell(row=row, column=23, value=kurs_6_grand_jami)
-            ws.cell(row=row, column=24, value=kurs_6_kontrakt_jami)
-            ws.cell(row=row, column=25, value=kurs_7_jami)
-            ws.cell(row=row, column=26, value=kurs_7_grand_jami)
-            ws.cell(row=row, column=27, value=kurs_7_kontrakt_jami)
+            for y in yonalish_Sirtqi:
+
+                jami = 0
+                jami_b = 0
+                jami_c = 0
+                yonalish_jami_1_kurs = 0
+                yonalish_jami_1_kurs_b = 0
+                yonalish_jami_1_kurs_c = 0
+                yonalish_jami_2_kurs = 0
+                yonalish_jami_2_kurs_b = 0
+                yonalish_jami_2_kurs_c = 0
+                yonalish_jami_3_kurs = 0
+                yonalish_jami_3_kurs_b = 0
+                yonalish_jami_3_kurs_c = 0
+                yonalish_jami_4_kurs = 0
+                yonalish_jami_4_kurs_b = 0
+                yonalish_jami_4_kurs_c = 0
+                yonalish_jami_5_kurs = 0
+                yonalish_jami_5_kurs_b = 0
+                yonalish_jami_5_kurs_c = 0
+                yonalish_jami_6_kurs = 0
+                yonalish_jami_6_kurs_b = 0
+                yonalish_jami_6_kurs_c = 0
+                yonalish_jami_7_kurs = 0
+                yonalish_jami_7_kurs_b = 0
+                yonalish_jami_7_kurs_c = 0
+                guruhs = Guruh.objects.filter(org=org, yonalish=y, yonalish__faculty=f)
+                for g in guruhs:
+
+                    budjet = Budjet.objects.filter(guruhi=g).aggregate(Sum('jami'))
+                    shartnoma = Shartnoma.objects.filter(guruh=g).aggregate(Sum('jami'))
+                    if budjet['jami__sum']:
+                        jami_full += budjet['jami__sum']
+                        jami2_full += budjet['jami__sum']
+                        jami2_b += budjet['jami__sum']
+                        jami += budjet['jami__sum']
+                        jami_b += budjet['jami__sum']
+                        jami2_b += budjet['jami__sum']
+
+                    if shartnoma['jami__sum']:
+                        jami_full += shartnoma['jami__sum']
+                        jami2_full += shartnoma['jami__sum']
+                        jami2_c += shartnoma['jami__sum']
+                        jami += shartnoma['jami__sum']
+                        jami_c += shartnoma['jami__sum']
+                        jami2_c += shartnoma['jami__sum']
+                    if jami != 0:
+                        if g.kurs == 1:
+                            if budjet['jami__sum']:
+                                jami_1_kurs += budjet['jami__sum']
+                                jami2_1_kurs += budjet['jami__sum']
+                                jami2_1_kurs_b += budjet['jami__sum']
+                                jami_1_kurs_b += budjet['jami__sum']
+                                yonalish_jami_1_kurs += budjet['jami__sum']
+                                yonalish_jami_1_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_1_kurs += shartnoma['jami__sum']
+                                jami2_1_kurs += shartnoma['jami__sum']
+                                jami2_1_kurs_c += shartnoma['jami__sum']
+                                jami_1_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_1_kurs += shartnoma['jami__sum']
+                                yonalish_jami_1_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 2:
+                            if budjet['jami__sum']:
+                                jami_2_kurs += budjet['jami__sum']
+                                jami2_2_kurs += budjet['jami__sum']
+                                jami2_2_kurs_b += budjet['jami__sum']
+                                jami_2_kurs_b += budjet['jami__sum']
+                                yonalish_jami_2_kurs += budjet['jami__sum']
+                                yonalish_jami_2_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_2_kurs += shartnoma['jami__sum']
+                                jami2_2_kurs += shartnoma['jami__sum']
+                                jami2_2_kurs_c += shartnoma['jami__sum']
+                                jami_2_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_2_kurs += shartnoma['jami__sum']
+                                yonalish_jami_2_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 3:
+                            if budjet['jami__sum']:
+                                jami_3_kurs += budjet['jami__sum']
+                                jami2_3_kurs += budjet['jami__sum']
+                                jami2_3_kurs_b += budjet['jami__sum']
+                                jami_3_kurs_b += budjet['jami__sum']
+                                yonalish_jami_3_kurs += budjet['jami__sum']
+                                yonalish_jami_3_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_3_kurs += shartnoma['jami__sum']
+                                jami_3_kurs_c += shartnoma['jami__sum']
+                                jami2_3_kurs += shartnoma['jami__sum']
+                                jami2_3_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_3_kurs += shartnoma['jami__sum']
+                                yonalish_jami_3_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 4:
+                            if budjet['jami__sum']:
+                                jami_4_kurs += budjet['jami__sum']
+                                jami_4_kurs_b += budjet['jami__sum']
+                                jami2_4_kurs += budjet['jami__sum']
+                                jami2_4_kurs_b += budjet['jami__sum']
+                                yonalish_jami_4_kurs += budjet['jami__sum']
+                                yonalish_jami_4_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_4_kurs += shartnoma['jami__sum']
+                                jami2_4_kurs += shartnoma['jami__sum']
+                                jami2_4_kurs_c += shartnoma['jami__sum']
+                                jami_4_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_4_kurs += shartnoma['jami__sum']
+                                yonalish_jami_4_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 5:
+                            if budjet['jami__sum']:
+                                jami_5_kurs += budjet['jami__sum']
+                                jami2_5_kurs += budjet['jami__sum']
+                                jami2_5_kurs_b += budjet['jami__sum']
+                                jami_5_kurs_b += budjet['jami__sum']
+                                yonalish_jami_5_kurs += budjet['jami__sum']
+                                yonalish_jami_5_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_5_kurs += shartnoma['jami__sum']
+                                jami_5_kurs_c += shartnoma['jami__sum']
+                                jami2_5_kurs += shartnoma['jami__sum']
+                                jami2_5_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_5_kurs += shartnoma['jami__sum']
+                                yonalish_jami_5_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 6:
+                            if budjet['jami__sum']:
+                                jami_6_kurs += budjet['jami__sum']
+                                jami_6_kurs_b += budjet['jami__sum']
+                                jami2_6_kurs += budjet['jami__sum']
+                                jami2_6_kurs_b += budjet['jami__sum']
+                                yonalish_jami_6_kurs += budjet['jami__sum']
+                                yonalish_jami_6_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_6_kurs += shartnoma['jami__sum']
+                                jami2_6_kurs += shartnoma['jami__sum']
+                                jami2_6_kurs_c += shartnoma['jami__sum']
+                                jami_6_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_6_kurs += shartnoma['jami__sum']
+                                yonalish_jami_6_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 7:
+                            if budjet['jami__sum']:
+                                jami_7_kurs += budjet['jami__sum']
+                                jami2_7_kurs += budjet['jami__sum']
+                                jami_7_kurs_b += budjet['jami__sum']
+                                yonalish_jami_7_kurs += budjet['jami__sum']
+                                yonalish_jami_7_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_7_kurs += shartnoma['jami__sum']
+                                jami2_7_kurs += shartnoma['jami__sum']
+                                jami_7_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_7_kurs += shartnoma['jami__sum']
+                                yonalish_jami_7_kurs_c += shartnoma['jami__sum']
+
+
+
+                if jami != 0:
+                    ws.cell(row=row, column=2, value=y.name)
+                    ws.cell(row=row, column=3, value=y.turi)
+                    ws.cell(row=row, column=4, value=jami)
+                    ws.cell(row=row, column=5, value=jami_b)
+                    ws.cell(row=row, column=6, value=jami_c)
+                    ws.cell(row=row, column=7, value=yonalish_jami_1_kurs)
+                    ws.cell(row=row, column=8, value=yonalish_jami_1_kurs_b)
+                    ws.cell(row=row, column=9, value=yonalish_jami_1_kurs_c)
+                    ws.cell(row=row, column=10, value=yonalish_jami_2_kurs)
+                    ws.cell(row=row, column=11, value=yonalish_jami_2_kurs_b)
+                    ws.cell(row=row, column=12, value=yonalish_jami_2_kurs_c)
+                    ws.cell(row=row, column=13, value=yonalish_jami_3_kurs)
+                    ws.cell(row=row, column=14, value=yonalish_jami_3_kurs_b)
+                    ws.cell(row=row, column=15, value=yonalish_jami_3_kurs_c)
+                    ws.cell(row=row, column=16, value=yonalish_jami_4_kurs)
+                    ws.cell(row=row, column=17, value=yonalish_jami_4_kurs_b)
+                    ws.cell(row=row, column=18, value=yonalish_jami_4_kurs_c)
+                    ws.cell(row=row, column=19, value=yonalish_jami_5_kurs)
+                    ws.cell(row=row, column=20, value=yonalish_jami_5_kurs_b)
+                    ws.cell(row=row, column=21, value=yonalish_jami_5_kurs_c)
+                    ws.cell(row=row, column=22, value=yonalish_jami_6_kurs)
+                    ws.cell(row=row, column=23, value=yonalish_jami_6_kurs_b)
+                    ws.cell(row=row, column=24, value=yonalish_jami_6_kurs_c)
+                    ws.cell(row=row, column=25, value=yonalish_jami_7_kurs)
+                    ws.cell(row=row, column=26, value=yonalish_jami_7_kurs_b)
+                    ws.cell(row=row, column=27, value=yonalish_jami_7_kurs_c)
+                    row += 1
+            for y in yonalish_Masofaviy:
+
+                jami = 0
+                jami_b = 0
+                jami_c = 0
+                yonalish_jami_1_kurs = 0
+                yonalish_jami_1_kurs_b = 0
+                yonalish_jami_1_kurs_c = 0
+                yonalish_jami_2_kurs = 0
+                yonalish_jami_2_kurs_b = 0
+                yonalish_jami_2_kurs_c = 0
+                yonalish_jami_3_kurs = 0
+                yonalish_jami_3_kurs_b = 0
+                yonalish_jami_3_kurs_c = 0
+                yonalish_jami_4_kurs = 0
+                yonalish_jami_4_kurs_b = 0
+                yonalish_jami_4_kurs_c = 0
+                yonalish_jami_5_kurs = 0
+                yonalish_jami_5_kurs_b = 0
+                yonalish_jami_5_kurs_c = 0
+                yonalish_jami_6_kurs = 0
+                yonalish_jami_6_kurs_b = 0
+                yonalish_jami_6_kurs_c = 0
+                yonalish_jami_7_kurs = 0
+                yonalish_jami_7_kurs_b = 0
+                yonalish_jami_7_kurs_c = 0
+                guruhs = Guruh.objects.filter(org=org, yonalish=y, yonalish__faculty=f)
+                for g in guruhs:
+
+                    budjet = Budjet.objects.filter(guruhi=g).aggregate(Sum('jami'))
+                    shartnoma = Shartnoma.objects.filter(guruh=g).aggregate(Sum('jami'))
+                    if budjet['jami__sum']:
+                        jami_full += budjet['jami__sum']
+                        jami2_full += budjet['jami__sum']
+                        jami2_b += budjet['jami__sum']
+                        jami += budjet['jami__sum']
+                        jami_b += budjet['jami__sum']
+                        jami2_b += budjet['jami__sum']
+
+                    if shartnoma['jami__sum']:
+                        jami_full += shartnoma['jami__sum']
+                        jami2_full += shartnoma['jami__sum']
+                        jami2_c += shartnoma['jami__sum']
+                        jami += shartnoma['jami__sum']
+                        jami_c += shartnoma['jami__sum']
+                        jami2_c += shartnoma['jami__sum']
+                    if jami != 0:
+                        if g.kurs == 1:
+                            if budjet['jami__sum']:
+                                jami_1_kurs += budjet['jami__sum']
+                                jami2_1_kurs += budjet['jami__sum']
+                                jami2_1_kurs_b += budjet['jami__sum']
+                                jami_1_kurs_b += budjet['jami__sum']
+                                yonalish_jami_1_kurs += budjet['jami__sum']
+                                yonalish_jami_1_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_1_kurs += shartnoma['jami__sum']
+                                jami2_1_kurs += shartnoma['jami__sum']
+                                jami2_1_kurs_c += shartnoma['jami__sum']
+                                jami_1_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_1_kurs += shartnoma['jami__sum']
+                                yonalish_jami_1_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 2:
+                            if budjet['jami__sum']:
+                                jami_2_kurs += budjet['jami__sum']
+                                jami2_2_kurs += budjet['jami__sum']
+                                jami2_2_kurs_b += budjet['jami__sum']
+                                jami_2_kurs_b += budjet['jami__sum']
+                                yonalish_jami_2_kurs += budjet['jami__sum']
+                                yonalish_jami_2_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_2_kurs += shartnoma['jami__sum']
+                                jami2_2_kurs += shartnoma['jami__sum']
+                                jami2_2_kurs_c += shartnoma['jami__sum']
+                                jami_2_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_2_kurs += shartnoma['jami__sum']
+                                yonalish_jami_2_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 3:
+                            if budjet['jami__sum']:
+                                jami_3_kurs += budjet['jami__sum']
+                                jami2_3_kurs += budjet['jami__sum']
+                                jami2_3_kurs_b += budjet['jami__sum']
+                                jami_3_kurs_b += budjet['jami__sum']
+                                yonalish_jami_3_kurs += budjet['jami__sum']
+                                yonalish_jami_3_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_3_kurs += shartnoma['jami__sum']
+                                jami_3_kurs_c += shartnoma['jami__sum']
+                                jami2_3_kurs += shartnoma['jami__sum']
+                                jami2_3_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_3_kurs += shartnoma['jami__sum']
+                                yonalish_jami_3_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 4:
+                            if budjet['jami__sum']:
+                                jami_4_kurs += budjet['jami__sum']
+                                jami_4_kurs_b += budjet['jami__sum']
+                                jami2_4_kurs += budjet['jami__sum']
+                                jami2_4_kurs_b += budjet['jami__sum']
+                                yonalish_jami_4_kurs += budjet['jami__sum']
+                                yonalish_jami_4_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_4_kurs += shartnoma['jami__sum']
+                                jami2_4_kurs += shartnoma['jami__sum']
+                                jami2_4_kurs_c += shartnoma['jami__sum']
+                                jami_4_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_4_kurs += shartnoma['jami__sum']
+                                yonalish_jami_4_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 5:
+                            if budjet['jami__sum']:
+                                jami_5_kurs += budjet['jami__sum']
+                                jami2_5_kurs += budjet['jami__sum']
+                                jami2_5_kurs_b += budjet['jami__sum']
+                                jami_5_kurs_b += budjet['jami__sum']
+                                yonalish_jami_5_kurs += budjet['jami__sum']
+                                yonalish_jami_5_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_5_kurs += shartnoma['jami__sum']
+                                jami_5_kurs_c += shartnoma['jami__sum']
+                                jami2_5_kurs += shartnoma['jami__sum']
+                                jami2_5_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_5_kurs += shartnoma['jami__sum']
+                                yonalish_jami_5_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 6:
+                            if budjet['jami__sum']:
+                                jami_6_kurs += budjet['jami__sum']
+                                jami_6_kurs_b += budjet['jami__sum']
+                                jami2_6_kurs += budjet['jami__sum']
+                                jami2_6_kurs_b += budjet['jami__sum']
+                                yonalish_jami_6_kurs += budjet['jami__sum']
+                                yonalish_jami_6_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_6_kurs += shartnoma['jami__sum']
+                                jami2_6_kurs += shartnoma['jami__sum']
+                                jami2_6_kurs_c += shartnoma['jami__sum']
+                                jami_6_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_6_kurs += shartnoma['jami__sum']
+                                yonalish_jami_6_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 7:
+                            if budjet['jami__sum']:
+                                jami_7_kurs += budjet['jami__sum']
+                                jami2_7_kurs += budjet['jami__sum']
+                                jami_7_kurs_b += budjet['jami__sum']
+                                yonalish_jami_7_kurs += budjet['jami__sum']
+                                yonalish_jami_7_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_7_kurs += shartnoma['jami__sum']
+                                jami2_7_kurs += shartnoma['jami__sum']
+                                jami_7_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_7_kurs += shartnoma['jami__sum']
+                                yonalish_jami_7_kurs_c += shartnoma['jami__sum']
+
+
+                if jami != 0:
+
+                    ws.cell(row=row, column=2, value=y.name)
+                    ws.cell(row=row, column=3, value=y.turi)
+                    ws.cell(row=row, column=4, value=jami)
+                    ws.cell(row=row, column=5, value=jami_b)
+                    ws.cell(row=row, column=6, value=jami_c)
+                    ws.cell(row=row, column=7, value=yonalish_jami_1_kurs)
+                    ws.cell(row=row, column=8, value=yonalish_jami_1_kurs_b)
+                    ws.cell(row=row, column=9, value=yonalish_jami_1_kurs_c)
+                    ws.cell(row=row, column=10, value=yonalish_jami_2_kurs)
+                    ws.cell(row=row, column=11, value=yonalish_jami_2_kurs_b)
+                    ws.cell(row=row, column=12, value=yonalish_jami_2_kurs_c)
+                    ws.cell(row=row, column=13, value=yonalish_jami_3_kurs)
+                    ws.cell(row=row, column=14, value=yonalish_jami_3_kurs_b)
+                    ws.cell(row=row, column=15, value=yonalish_jami_3_kurs_c)
+                    ws.cell(row=row, column=16, value=yonalish_jami_4_kurs)
+                    ws.cell(row=row, column=17, value=yonalish_jami_4_kurs_b)
+                    ws.cell(row=row, column=18, value=yonalish_jami_4_kurs_c)
+                    ws.cell(row=row, column=19, value=yonalish_jami_5_kurs)
+                    ws.cell(row=row, column=20, value=yonalish_jami_5_kurs_b)
+                    ws.cell(row=row, column=21, value=yonalish_jami_5_kurs_c)
+                    ws.cell(row=row, column=22, value=yonalish_jami_6_kurs)
+                    ws.cell(row=row, column=23, value=yonalish_jami_6_kurs_b)
+                    ws.cell(row=row, column=24, value=yonalish_jami_6_kurs_c)
+                    ws.cell(row=row, column=25, value=yonalish_jami_7_kurs)
+                    ws.cell(row=row, column=26, value=yonalish_jami_7_kurs_b)
+                    ws.cell(row=row, column=27, value=yonalish_jami_7_kurs_c)
+                    row += 1
+            for y in yonalish_Doktorantura:
+
+                jami = 0
+                jami_b = 0
+                jami_c = 0
+                yonalish_jami_1_kurs = 0
+                yonalish_jami_1_kurs_b = 0
+                yonalish_jami_1_kurs_c = 0
+                yonalish_jami_2_kurs = 0
+                yonalish_jami_2_kurs_b = 0
+                yonalish_jami_2_kurs_c = 0
+                yonalish_jami_3_kurs = 0
+                yonalish_jami_3_kurs_b = 0
+                yonalish_jami_3_kurs_c = 0
+                yonalish_jami_4_kurs = 0
+                yonalish_jami_4_kurs_b = 0
+                yonalish_jami_4_kurs_c = 0
+                yonalish_jami_5_kurs = 0
+                yonalish_jami_5_kurs_b = 0
+                yonalish_jami_5_kurs_c = 0
+                yonalish_jami_6_kurs = 0
+                yonalish_jami_6_kurs_b = 0
+                yonalish_jami_6_kurs_c = 0
+                yonalish_jami_7_kurs = 0
+                yonalish_jami_7_kurs_b = 0
+                yonalish_jami_7_kurs_c = 0
+                guruhs = Guruh.objects.filter(org=org, yonalish=y, yonalish__faculty=f)
+                for g in guruhs:
+
+                    budjet = Budjet.objects.filter(guruhi=g).aggregate(Sum('jami'))
+                    shartnoma = Shartnoma.objects.filter(guruh=g).aggregate(Sum('jami'))
+                    if budjet['jami__sum']:
+                        jami_full += budjet['jami__sum']
+                        jami2_full += budjet['jami__sum']
+                        jami2_b += budjet['jami__sum']
+                        jami += budjet['jami__sum']
+                        jami_b += budjet['jami__sum']
+                        jami2_b += budjet['jami__sum']
+
+                    if shartnoma['jami__sum']:
+                        jami_full += shartnoma['jami__sum']
+                        jami2_full += shartnoma['jami__sum']
+                        jami2_c += shartnoma['jami__sum']
+                        jami += shartnoma['jami__sum']
+                        jami_c += shartnoma['jami__sum']
+                        jami2_c += shartnoma['jami__sum']
+                    if jami != 0:
+                        if g.kurs == 1:
+                            if budjet['jami__sum']:
+                                jami_1_kurs += budjet['jami__sum']
+                                jami2_1_kurs += budjet['jami__sum']
+                                jami2_1_kurs_b += budjet['jami__sum']
+                                jami_1_kurs_b += budjet['jami__sum']
+                                yonalish_jami_1_kurs += budjet['jami__sum']
+                                yonalish_jami_1_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_1_kurs += shartnoma['jami__sum']
+                                jami2_1_kurs += shartnoma['jami__sum']
+                                jami2_1_kurs_c += shartnoma['jami__sum']
+                                jami_1_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_1_kurs += shartnoma['jami__sum']
+                                yonalish_jami_1_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 2:
+                            if budjet['jami__sum']:
+                                jami_2_kurs += budjet['jami__sum']
+                                jami2_2_kurs += budjet['jami__sum']
+                                jami2_2_kurs_b += budjet['jami__sum']
+                                jami_2_kurs_b += budjet['jami__sum']
+                                yonalish_jami_2_kurs += budjet['jami__sum']
+                                yonalish_jami_2_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_2_kurs += shartnoma['jami__sum']
+                                jami2_2_kurs += shartnoma['jami__sum']
+                                jami2_2_kurs_c += shartnoma['jami__sum']
+                                jami_2_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_2_kurs += shartnoma['jami__sum']
+                                yonalish_jami_2_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 3:
+                            if budjet['jami__sum']:
+                                jami_3_kurs += budjet['jami__sum']
+                                jami2_3_kurs += budjet['jami__sum']
+                                jami2_3_kurs_b += budjet['jami__sum']
+                                jami_3_kurs_b += budjet['jami__sum']
+                                yonalish_jami_3_kurs += budjet['jami__sum']
+                                yonalish_jami_3_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_3_kurs += shartnoma['jami__sum']
+                                jami_3_kurs_c += shartnoma['jami__sum']
+                                jami2_3_kurs += shartnoma['jami__sum']
+                                jami2_3_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_3_kurs += shartnoma['jami__sum']
+                                yonalish_jami_3_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 4:
+                            if budjet['jami__sum']:
+                                jami_4_kurs += budjet['jami__sum']
+                                jami_4_kurs_b += budjet['jami__sum']
+                                jami2_4_kurs += budjet['jami__sum']
+                                jami2_4_kurs_b += budjet['jami__sum']
+                                yonalish_jami_4_kurs += budjet['jami__sum']
+                                yonalish_jami_4_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_4_kurs += shartnoma['jami__sum']
+                                jami2_4_kurs += shartnoma['jami__sum']
+                                jami2_4_kurs_c += shartnoma['jami__sum']
+                                jami_4_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_4_kurs += shartnoma['jami__sum']
+                                yonalish_jami_4_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 5:
+                            if budjet['jami__sum']:
+                                jami_5_kurs += budjet['jami__sum']
+                                jami2_5_kurs += budjet['jami__sum']
+                                jami2_5_kurs_b += budjet['jami__sum']
+                                jami_5_kurs_b += budjet['jami__sum']
+                                yonalish_jami_5_kurs += budjet['jami__sum']
+                                yonalish_jami_5_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_5_kurs += shartnoma['jami__sum']
+                                jami_5_kurs_c += shartnoma['jami__sum']
+                                jami2_5_kurs += shartnoma['jami__sum']
+                                jami2_5_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_5_kurs += shartnoma['jami__sum']
+                                yonalish_jami_5_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 6:
+                            if budjet['jami__sum']:
+                                jami_6_kurs += budjet['jami__sum']
+                                jami_6_kurs_b += budjet['jami__sum']
+                                jami2_6_kurs += budjet['jami__sum']
+                                jami2_6_kurs_b += budjet['jami__sum']
+                                yonalish_jami_6_kurs += budjet['jami__sum']
+                                yonalish_jami_6_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_6_kurs += shartnoma['jami__sum']
+                                jami2_6_kurs += shartnoma['jami__sum']
+                                jami2_6_kurs_c += shartnoma['jami__sum']
+                                jami_6_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_6_kurs += shartnoma['jami__sum']
+                                yonalish_jami_6_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 7:
+                            if budjet['jami__sum']:
+                                jami_7_kurs += budjet['jami__sum']
+                                jami2_7_kurs += budjet['jami__sum']
+                                jami_7_kurs_b += budjet['jami__sum']
+                                yonalish_jami_7_kurs += budjet['jami__sum']
+                                yonalish_jami_7_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_7_kurs += shartnoma['jami__sum']
+                                jami2_7_kurs += shartnoma['jami__sum']
+                                jami_7_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_7_kurs += shartnoma['jami__sum']
+                                yonalish_jami_7_kurs_c += shartnoma['jami__sum']
+
+
+                if jami != 0:
+                    ws.cell(row=row, column=2, value=y.name)
+                    ws.cell(row=row, column=3, value=y.turi)
+                    ws.cell(row=row, column=4, value=jami)
+                    ws.cell(row=row, column=5, value=jami_b)
+                    ws.cell(row=row, column=6, value=jami_c)
+                    ws.cell(row=row, column=7, value=yonalish_jami_1_kurs)
+                    ws.cell(row=row, column=8, value=yonalish_jami_1_kurs_b)
+                    ws.cell(row=row, column=9, value=yonalish_jami_1_kurs_c)
+                    ws.cell(row=row, column=10, value=yonalish_jami_2_kurs)
+                    ws.cell(row=row, column=11, value=yonalish_jami_2_kurs_b)
+                    ws.cell(row=row, column=12, value=yonalish_jami_2_kurs_c)
+                    ws.cell(row=row, column=13, value=yonalish_jami_3_kurs)
+                    ws.cell(row=row, column=14, value=yonalish_jami_3_kurs_b)
+                    ws.cell(row=row, column=15, value=yonalish_jami_3_kurs_c)
+                    ws.cell(row=row, column=16, value=yonalish_jami_4_kurs)
+                    ws.cell(row=row, column=17, value=yonalish_jami_4_kurs_b)
+                    ws.cell(row=row, column=18, value=yonalish_jami_4_kurs_c)
+                    ws.cell(row=row, column=19, value=yonalish_jami_5_kurs)
+                    ws.cell(row=row, column=20, value=yonalish_jami_5_kurs_b)
+                    ws.cell(row=row, column=21, value=yonalish_jami_5_kurs_c)
+                    ws.cell(row=row, column=22, value=yonalish_jami_6_kurs)
+                    ws.cell(row=row, column=23, value=yonalish_jami_6_kurs_b)
+                    ws.cell(row=row, column=24, value=yonalish_jami_6_kurs_c)
+                    ws.cell(row=row, column=25, value=yonalish_jami_7_kurs)
+                    ws.cell(row=row, column=26, value=yonalish_jami_7_kurs_b)
+                    ws.cell(row=row, column=27, value=yonalish_jami_7_kurs_c)
+                    row += 1
+            for y in yonalish_ikkinchi_talim:
+
+                jami = 0
+                jami_b = 0
+                jami_c = 0
+                yonalish_jami_1_kurs = 0
+                yonalish_jami_1_kurs_b = 0
+                yonalish_jami_1_kurs_c = 0
+                yonalish_jami_2_kurs = 0
+                yonalish_jami_2_kurs_b = 0
+                yonalish_jami_2_kurs_c = 0
+                yonalish_jami_3_kurs = 0
+                yonalish_jami_3_kurs_b = 0
+                yonalish_jami_3_kurs_c = 0
+                yonalish_jami_4_kurs = 0
+                yonalish_jami_4_kurs_b = 0
+                yonalish_jami_4_kurs_c = 0
+                yonalish_jami_5_kurs = 0
+                yonalish_jami_5_kurs_b = 0
+                yonalish_jami_5_kurs_c = 0
+                yonalish_jami_6_kurs = 0
+                yonalish_jami_6_kurs_b = 0
+                yonalish_jami_6_kurs_c = 0
+                yonalish_jami_7_kurs = 0
+                yonalish_jami_7_kurs_b = 0
+                yonalish_jami_7_kurs_c = 0
+                guruhs = Guruh.objects.filter(org=org, yonalish=y, yonalish__faculty=f)
+                for g in guruhs:
+
+                    budjet = Budjet.objects.filter(guruhi=g).aggregate(Sum('jami'))
+                    shartnoma = Shartnoma.objects.filter(guruh=g).aggregate(Sum('jami'))
+                    if budjet['jami__sum']:
+                        jami_full += budjet['jami__sum']
+                        jami2_full += budjet['jami__sum']
+                        jami2_b += budjet['jami__sum']
+                        jami += budjet['jami__sum']
+                        jami_b += budjet['jami__sum']
+                        jami2_b += budjet['jami__sum']
+
+                    if shartnoma['jami__sum']:
+                        jami_full += shartnoma['jami__sum']
+                        jami2_full += shartnoma['jami__sum']
+                        jami2_c += shartnoma['jami__sum']
+                        jami += shartnoma['jami__sum']
+                        jami_c += shartnoma['jami__sum']
+                        jami2_c += shartnoma['jami__sum']
+                    if jami != 0:
+                        if g.kurs == 1:
+                            if budjet['jami__sum']:
+                                jami_1_kurs += budjet['jami__sum']
+                                jami2_1_kurs += budjet['jami__sum']
+                                jami2_1_kurs_b += budjet['jami__sum']
+                                jami_1_kurs_b += budjet['jami__sum']
+                                yonalish_jami_1_kurs += budjet['jami__sum']
+                                yonalish_jami_1_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_1_kurs += shartnoma['jami__sum']
+                                jami2_1_kurs += shartnoma['jami__sum']
+                                jami2_1_kurs_c += shartnoma['jami__sum']
+                                jami_1_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_1_kurs += shartnoma['jami__sum']
+                                yonalish_jami_1_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 2:
+                            if budjet['jami__sum']:
+                                jami_2_kurs += budjet['jami__sum']
+                                jami2_2_kurs += budjet['jami__sum']
+                                jami2_2_kurs_b += budjet['jami__sum']
+                                jami_2_kurs_b += budjet['jami__sum']
+                                yonalish_jami_2_kurs += budjet['jami__sum']
+                                yonalish_jami_2_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_2_kurs += shartnoma['jami__sum']
+                                jami2_2_kurs += shartnoma['jami__sum']
+                                jami2_2_kurs_c += shartnoma['jami__sum']
+                                jami_2_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_2_kurs += shartnoma['jami__sum']
+                                yonalish_jami_2_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 3:
+                            if budjet['jami__sum']:
+                                jami_3_kurs += budjet['jami__sum']
+                                jami2_3_kurs += budjet['jami__sum']
+                                jami2_3_kurs_b += budjet['jami__sum']
+                                jami_3_kurs_b += budjet['jami__sum']
+                                yonalish_jami_3_kurs += budjet['jami__sum']
+                                yonalish_jami_3_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_3_kurs += shartnoma['jami__sum']
+                                jami_3_kurs_c += shartnoma['jami__sum']
+                                jami2_3_kurs += shartnoma['jami__sum']
+                                jami2_3_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_3_kurs += shartnoma['jami__sum']
+                                yonalish_jami_3_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 4:
+                            if budjet['jami__sum']:
+                                jami_4_kurs += budjet['jami__sum']
+                                jami_4_kurs_b += budjet['jami__sum']
+                                jami2_4_kurs += budjet['jami__sum']
+                                jami2_4_kurs_b += budjet['jami__sum']
+                                yonalish_jami_4_kurs += budjet['jami__sum']
+                                yonalish_jami_4_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_4_kurs += shartnoma['jami__sum']
+                                jami2_4_kurs += shartnoma['jami__sum']
+                                jami2_4_kurs_c += shartnoma['jami__sum']
+                                jami_4_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_4_kurs += shartnoma['jami__sum']
+                                yonalish_jami_4_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 5:
+                            if budjet['jami__sum']:
+                                jami_5_kurs += budjet['jami__sum']
+                                jami2_5_kurs += budjet['jami__sum']
+                                jami2_5_kurs_b += budjet['jami__sum']
+                                jami_5_kurs_b += budjet['jami__sum']
+                                yonalish_jami_5_kurs += budjet['jami__sum']
+                                yonalish_jami_5_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_5_kurs += shartnoma['jami__sum']
+                                jami_5_kurs_c += shartnoma['jami__sum']
+                                jami2_5_kurs += shartnoma['jami__sum']
+                                jami2_5_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_5_kurs += shartnoma['jami__sum']
+                                yonalish_jami_5_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 6:
+                            if budjet['jami__sum']:
+                                jami_6_kurs += budjet['jami__sum']
+                                jami_6_kurs_b += budjet['jami__sum']
+                                jami2_6_kurs += budjet['jami__sum']
+                                jami2_6_kurs_b += budjet['jami__sum']
+                                yonalish_jami_6_kurs += budjet['jami__sum']
+                                yonalish_jami_6_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_6_kurs += shartnoma['jami__sum']
+                                jami2_6_kurs += shartnoma['jami__sum']
+                                jami2_6_kurs_c += shartnoma['jami__sum']
+                                jami_6_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_6_kurs += shartnoma['jami__sum']
+                                yonalish_jami_6_kurs_c += shartnoma['jami__sum']
+                        if g.kurs == 7:
+                            if budjet['jami__sum']:
+                                jami_7_kurs += budjet['jami__sum']
+                                jami2_7_kurs += budjet['jami__sum']
+                                jami_7_kurs_b += budjet['jami__sum']
+                                yonalish_jami_7_kurs += budjet['jami__sum']
+                                yonalish_jami_7_kurs_b += budjet['jami__sum']
+                            if shartnoma['jami__sum']:
+                                jami_7_kurs += shartnoma['jami__sum']
+                                jami2_7_kurs += shartnoma['jami__sum']
+                                jami_7_kurs_c += shartnoma['jami__sum']
+                                yonalish_jami_7_kurs += shartnoma['jami__sum']
+                                yonalish_jami_7_kurs_c += shartnoma['jami__sum']
+
+
+                if jami != 0:
+                    ws.cell(row=row, column=2, value=y.name)
+                    ws.cell(row=row, column=3, value=y.turi)
+                    ws.cell(row=row, column=4, value=jami)
+                    ws.cell(row=row, column=5, value=jami_b)
+                    ws.cell(row=row, column=6, value=jami_c)
+                    ws.cell(row=row, column=7, value=yonalish_jami_1_kurs)
+                    ws.cell(row=row, column=8, value=yonalish_jami_1_kurs_b)
+                    ws.cell(row=row, column=9, value=yonalish_jami_1_kurs_c)
+                    ws.cell(row=row, column=10, value=yonalish_jami_2_kurs)
+                    ws.cell(row=row, column=11, value=yonalish_jami_2_kurs_b)
+                    ws.cell(row=row, column=12, value=yonalish_jami_2_kurs_c)
+                    ws.cell(row=row, column=13, value=yonalish_jami_3_kurs)
+                    ws.cell(row=row, column=14, value=yonalish_jami_3_kurs_b)
+                    ws.cell(row=row, column=15, value=yonalish_jami_3_kurs_c)
+                    ws.cell(row=row, column=16, value=yonalish_jami_4_kurs)
+                    ws.cell(row=row, column=17, value=yonalish_jami_4_kurs_b)
+                    ws.cell(row=row, column=18, value=yonalish_jami_4_kurs_c)
+                    ws.cell(row=row, column=19, value=yonalish_jami_5_kurs)
+                    ws.cell(row=row, column=20, value=yonalish_jami_5_kurs_b)
+                    ws.cell(row=row, column=21, value=yonalish_jami_5_kurs_c)
+                    ws.cell(row=row, column=22, value=yonalish_jami_6_kurs)
+                    ws.cell(row=row, column=23, value=yonalish_jami_6_kurs_b)
+                    ws.cell(row=row, column=24, value=yonalish_jami_6_kurs_c)
+                    ws.cell(row=row, column=25, value=yonalish_jami_7_kurs)
+                    ws.cell(row=row, column=26, value=yonalish_jami_7_kurs_b)
+                    ws.cell(row=row, column=27, value=yonalish_jami_7_kurs_c)
+                    row += 1
             row += 1
 
+            ws.cell(row=row, column=2, value=f'{f.name} jami')
+            ws.cell(row=row, column=4, value=jami_full)
+            ws.cell(row=row, column=5, value=jami_b)
+            ws.cell(row=row, column=6, value=jami_c)
+            ws.cell(row=row, column=7, value=jami_1_kurs)
+            ws.cell(row=row, column=8, value=jami_1_kurs_b)
+            ws.cell(row=row, column=9, value=jami_1_kurs_c)
+            ws.cell(row=row, column=10, value=jami_2_kurs)
+            ws.cell(row=row, column=11, value=jami_2_kurs_b)
+            ws.cell(row=row, column=12, value=jami_2_kurs_c)
+            ws.cell(row=row, column=13, value=jami_3_kurs)
+            ws.cell(row=row, column=14, value=jami_3_kurs_b)
+            ws.cell(row=row, column=15, value=jami_3_kurs_c)
+            ws.cell(row=row, column=16, value=jami_4_kurs)
+            ws.cell(row=row, column=17, value=jami_4_kurs_b)
+            ws.cell(row=row, column=18, value=jami_4_kurs_c)
+            ws.cell(row=row, column=19, value=jami_5_kurs)
+
+            ws.cell(row=row, column=20, value=jami_5_kurs_b)
+            ws.cell(row=row, column=21, value=jami_5_kurs_c)
+            ws.cell(row=row, column=22, value=jami_6_kurs)
+            ws.cell(row=row, column=23, value=jami_6_kurs_b)
+            ws.cell(row=row, column=24, value=jami_6_kurs_c)
+            ws.cell(row=row, column=25, value=jami_7_kurs)
+            ws.cell(row=row, column=26, value=jami_7_kurs_b)
+            ws.cell(row=row, column=27, value=jami_7_kurs_c)
+            row += 1
+
+
+
+
+
     wb.save('talabalar.xlsx')
+
 
 exporttoexcel4(org)

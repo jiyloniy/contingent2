@@ -37,9 +37,7 @@
                     <div class="page_title">
                         <h2>Yo'nalishlar</h2>
                         <div class="col-12 col-md-auto d-flex align-items-center justify-content-end page-actions">
-                            <div style="padding-right: 12px;">
-                                <button type="button" class="btn btn-primary">Export Exel</button>
-                            </div>
+
                             {% with can_add_yonalish=perms.user.add_yonalish %}
                                 {% if can_add_yonalish %}
                                 <a href="" data-mdb-modal-init data-mdb-target="#exampleModal"
@@ -63,7 +61,7 @@
                 <div class="card-body">
                     <h4 class="card-title">Yo'nalishlar</h4>
                     <div class="table-responsive">
-                        <table class="table">
+                         <table class="table" id="paginationTable">
                             <thead>
 
                             <tr>
