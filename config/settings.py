@@ -36,7 +36,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
+    'background_task',
+    'debug_toolbar',
     'guardian',
     'user',
 ]
@@ -51,6 +52,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.locale.LocaleMiddleware',  # new
     'django.middleware.common.CommonMiddleware',  # new
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 
 ]
 
@@ -77,7 +79,12 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',  # this is default
     'guardian.backends.ObjectPermissionBackend',
 )
+MAX_ATTEMPTS = 3 # Maksimal urinishlar soni
+MAX_RUN_TIME = 360  # Vazifaning maksimal bajarilish vaqti (sekundlarda)
 
+INTERNAL_IPS = [
+    '127.0.0.1', # Lokal IP manzil
+]
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
@@ -133,17 +140,12 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-JAZZMIN_SETTINGS = {
-    "icons": {
-        "auth": "fas fa-users-cog",
-        "auth.user": "fas fa-user",
-        "auth.Group": "fas fa-users",
-    },
-    # Icon to use for your user model
+JAZZMIN_SETTINGS = {"icons": {
+    "auth": "fas fa-users-cog",
+    "auth.user": "fas fa-user",
+    "auth.Group": "fas fa-users",
+}, "show_ui_builder": True}
 
-}
-
-JAZZMIN_SETTINGS["show_ui_builder"] = True
 MESSAGE_TAGS = {
     messages.ERROR: 'danger',
     messages.SUCCESS: 'success',

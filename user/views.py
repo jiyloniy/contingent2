@@ -1,5 +1,7 @@
 import os
 
+from background_task import background
+from background_task.models import Task
 from django.contrib.sessions.models import Session
 from django.db import transaction
 from django.shortcuts import render
@@ -760,8 +762,42 @@ def user_delete(request, pk):
 @login_required(login_url='login')
 def emptypage(request):
     return render(request, 'pages/empty.html')
+#
+# @login_required(login_url='login')
+# def generateexcel(request):
+#     org = None
+#     if UserOrg.objects.filter(user=request.user).exists():
+#         org = UserOrg.objects.get(user=request.user).org
+#     if Organization.objects.filter(user=request.user).exists():
+#         org = Organization.objects.get(user=request.user)
+#     if org:
+#         if request.method == 'POST':
+#             excel_files = generate_excel_files(org)
+#
+#             # Merge the Excel files
+#             merged_output = merge_excel_files(excel_files)
+#
+#             # Set the response headers
+#             response = HttpResponse(merged_output.getvalue(),
+#                                     content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+#             response['Content-Disposition'] = 'attachment; filename=merged_excel.xlsx'
+#
+#             return response
+#         else:
+#             return render(request, 'pages/generateexcel.html')
+#     else:
+#         messages.error(request, 'Your organization information is missing.')
+#         return redirect('empty')
 
-from django.http import FileResponse
+
+
+@background(schedule=60)
+def asyncexcelgenarate(org):
+    excel_files = generate_excel_files(org)
+    merged_output = merge_excel_files(excel_files)
+    response = HttpResponse(merged_output.getvalue(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=merged_excel.xlsx'
+    return response
 
 @login_required(login_url='login')
 def generateexcel(request):
@@ -771,20 +807,14 @@ def generateexcel(request):
     if Organization.objects.filter(user=request.user).exists():
         org = Organization.objects.get(user=request.user)
     if org:
-        if request.method == 'POST':
-            excel_files = generate_excel_files(org)
-
-            # Merge the Excel files
-            merged_output = merge_excel_files(excel_files)
-
-            # Set the response headers
-            response = HttpResponse(merged_output.getvalue(),
-                                    content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-            response['Content-Disposition'] = 'attachment; filename=merged_excel.xlsx'
-
-            return response
-        else:
-            return render(request, 'pages/generateexcel.html')
+        excel_files = generate_excel_files(org)
+        merged_output = merge_excel_files(excel_files)
+        response = HttpResponse(merged_output.getvalue(),
+                                content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename=merged_excel.xlsx'
+        return response
     else:
         messages.error(request, 'Your organization information is missing.')
         return redirect('empty')
+
+
