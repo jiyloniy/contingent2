@@ -1264,7 +1264,7 @@ def exporttoexcel3(org):
                 kurs_7_kontrakt_jami += shartnoma_jami
 
     row += 1
-    ws.cell(row=row, column=2, value=f'{fakultet.name}')
+    # ws.cell(row=row, column=2, value=f'{fakultet.name}')
     ws.cell(row=row, column=4, value=jami_full)
     ws.cell(row=row, column=5, value=jami_uzek)
     ws.cell(row=row, column=6, value=jami_rus)

@@ -23,12 +23,10 @@ from django.contrib.auth.models import Permission
 from django.utils import timezone
 from guardian.models import UserObjectPermission, GroupObjectPermission
 from django.contrib.contenttypes.models import ContentType
-from user.models import Organization, UserOrg, Budjet, Guruh, Shartnoma, Faculty, Yonalish, UserRules
+from user.models import Guruh, Faculty, UserRules
 
-from user.forms import LoginForm, FacultyForm, YonalishForm, ShartnomaForm, BudjetForm, GuruhForm, ShartmonomaFormSet, \
+from user.forms import LoginForm, FacultyForm, ShartnomaForm, BudjetForm, GuruhForm, ShartmonomaFormSet, \
     BudjetFormSet, UserRule, UserRuleUpdate
-
-from django.contrib.auth import logout as auth_logout
 
 
 def login_view(request):
@@ -762,6 +760,8 @@ def user_delete(request, pk):
 @login_required(login_url='login')
 def emptypage(request):
     return render(request, 'pages/empty.html')
+
+
 #
 # @login_required(login_url='login')
 # def generateexcel(request):
@@ -790,14 +790,15 @@ def emptypage(request):
 #         return redirect('empty')
 
 
-
 @background(schedule=60)
 def asyncexcelgenarate(org):
     excel_files = generate_excel_files(org)
     merged_output = merge_excel_files(excel_files)
-    response = HttpResponse(merged_output.getvalue(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response = HttpResponse(merged_output.getvalue(),
+                            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename=merged_excel.xlsx'
     return response
+
 
 @login_required(login_url='login')
 def generateexcel(request):
@@ -806,15 +807,16 @@ def generateexcel(request):
         org = UserOrg.objects.get(user=request.user).org
     if Organization.objects.filter(user=request.user).exists():
         org = Organization.objects.get(user=request.user)
-    if org:
-        excel_files = generate_excel_files(org)
-        merged_output = merge_excel_files(excel_files)
-        response = HttpResponse(merged_output.getvalue(),
-                                content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename=merged_excel.xlsx'
-        return response
+    if request.method == 'POST':
+        if org:
+            excel_files = generate_excel_files(org)
+            merged_output = merge_excel_files(excel_files)
+            response = HttpResponse(merged_output.getvalue(),
+                                    content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = 'attachment; filename=merged_excel.xlsx'
+            return response
+        else:
+            messages.error(request, 'Your organization information is missing.')
+            return redirect('empty')
     else:
-        messages.error(request, 'Your organization information is missing.')
-        return redirect('empty')
-
-
+        return render(request, 'pages/generateexcel.html')
